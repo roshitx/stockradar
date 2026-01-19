@@ -1,0 +1,3567 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Datasaham.io API",
+    "description": "\n## Tentang\n\nDatasaham.io API adalah layanan RESTful API komprehensif untuk analisis pasar saham Indonesia (IDX). Dibangun dengan prinsip clean architecture, API ini menyediakan data pasar real-time, analitik canggih, dan insight trading yang cerdas.\n\n## 🌍 Global Market Data API\n\nButuh data pasar global? Kunjungi **[OHLC.dev](https://ohlc.dev)** - API kami untuk data pasar global:\n- **Stocks**: US, EU, Asia markets (NYSE, NASDAQ, LSE, TSE, dll)\n- **Crypto**: Bitcoin, Ethereum, dan 1000+ altcoins\n- **Forex**: Major, minor, dan exotic pairs\n- **Commodities**: Gold, Silver, Oil, Natural Gas, dll\n- **Indices**: S&P 500, NASDAQ, Dow Jones, FTSE, Nikkei, dll\n\n➡️ **[https://ohlc.dev](https://ohlc.dev)** - Real-time & historical OHLCV data untuk global markets\n\n## Fitur Utama\n\n### 📅 Calendar\nKalender aksi korporasi - dividen, stock split, IPO, RUPS, dan corporate actions lainnya\n\n### 🔍 Main\nEndpoint umum - pencarian saham, trending stocks, dan informasi pasar\n\n### 🌍 Global Market\nData pasar global - indeks dunia, komoditas, forex, dan analisis dampaknya terhadap IDX\n\n### 📊 Chart\nData OHLCV dan chart - daily, weekly, monthly, dan intraday (15m, 30m, 1h, 2h, 3h, 4h)\n\n### 🏢 Sectors\nData sektor dan subsektor - performa sektor, daftar perusahaan per sektor\n\n### 📈 Movers\nMarket movers - top gainer, top loser, top value, top volume, net foreign buy/sell\n\n### 🎯 Market Detector\nAnalisis aktivitas broker - broker activity, top broker, top stock, broker summary\n\n### 🎰 Bandarmology\nAnalisis bandar/market maker - deteksi akumulasi, distribusi, smart money flow, pump & dump\n\n### 💎 Retail Opportunity\nPeluang untuk retail investor - multibagger scanner, breakout alerts, risk-reward calculator, sector rotation\n\n### 📉 Market Sentiment\nAnalisis sentimen pasar - retail vs bandar sentiment, IPO momentum tracker\n\n### 🔬 Advanced Analytics\nAnalitik lanjutan - correlation matrix, whale transaction detector, insider screening, technical analyst, global screener\n\n### 🏛️ Emiten\nInformasi emiten - profil perusahaan, data keuangan, broker summary, insider trading, tradebook chart\n\n### 🧪 BETA\nFitur eksperimental - insights, earnings, equities, key ratios (data dari Datasaham.io)\n\n## Autentikasi\n\nSemua endpoint API memerlukan autentikasi menggunakan API key. Sertakan API key Anda di request header:\n\n```\nx-api-key: your_api_key_here\n```\n\n## Rate Limiting\n\nRequest API dibatasi berdasarkan tier langganan Anda. Cek response headers untuk penggunaan saat ini:\n- `X-RateLimit-Limit` - Maksimum request yang diizinkan\n- `X-RateLimit-Remaining` - Sisa request dalam window saat ini\n- `X-RateLimit-Reset` - Waktu reset rate limit\n                        ",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "Health",
+      "description": "API health check"
+    },
+    {
+      "name": "Calendar",
+      "description": "Corporate action calendar events"
+    },
+    {
+      "name": "Main",
+      "description": "General endpoints"
+    },
+    {
+      "name": "Global Market",
+      "description": "Global market data (indices, commodities, forex) and impact analysis on IDX"
+    },
+    {
+      "name": "Chart",
+      "description": "Chart and OHLCV data"
+    },
+    {
+      "name": "Sectors",
+      "description": "Sector, subsector, and company data"
+    },
+    {
+      "name": "Movers",
+      "description": "Market movers (top gainer, top loser, etc.)"
+    },
+    {
+      "name": "Market Detector",
+      "description": "Stock market analysis"
+    },
+    {
+      "name": "Bandarmology",
+      "description": "Bandar/market maker analysis (accumulation, distribution, smart money, pump & dump)"
+    },
+    {
+      "name": "Retail Opportunity",
+      "description": "Retail opportunity finder (multibagger scanner, breakout alerts, risk-reward calculator)"
+    },
+    {
+      "name": "Market Sentiment",
+      "description": "Market sentiment analysis (retail vs bandar sentiment, IPO momentum tracker)"
+    },
+    {
+      "name": "Advanced Analytics",
+      "description": "Advanced analytics (correlation matrix, whale transaction detector)"
+    },
+    {
+      "name": "Emiten",
+      "description": "Emiten/company information and data"
+    },
+    {
+      "name": "BETA",
+      "description": "Experimental features - may change without notice."
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "name": "x-api-key",
+        "in": "header",
+        "description": "Enter your API Key"
+      }
+    },
+    "schemas": {}
+  },
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "API Info",
+        "description": "Get API information and links to documentation. Visit /swagger for full interactive documentation.",
+        "operationId": "getIndex"
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Comprehensive Health Check",
+        "description": "Get detailed health status of all system components:\n                \n**Checks:**\n- API status\n- Database connection (PostgreSQL)\n- Redis cache connection\n- System information (memory, uptime, Node version)\n- Response times for each service\n\n**Status Values:**\n- `healthy`: All services are operational\n- `degraded`: One or more services are experiencing issues\n- `unhealthy`: Critical services are down",
+        "operationId": "getHealth"
+      }
+    },
+    "/api/calendar/dividend": {
+      "get": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Get Dividend Calendar",
+        "description": "Get upcoming and past dividend distributions with cum date, ex date, payment date, and dividend value",
+        "operationId": "getApiCalendarDividend"
+      }
+    },
+    "/api/calendar/bonus": {
+      "get": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Get Bonus Shares Calendar",
+        "description": "Get bonus share distributions with ratio, cum date, ex date, and payment date",
+        "operationId": "getApiCalendarBonus"
+      }
+    },
+    "/api/calendar/stock-split": {
+      "get": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Get Stock Split Calendar",
+        "description": "Get stock split events with split ratio, cum date, ex date, and recording date",
+        "operationId": "getApiCalendarStock-split"
+      }
+    },
+    "/api/calendar/right-issue": {
+      "get": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Get Right Issue Calendar",
+        "description": "Get rights issue offerings with price, ratio, trading period, and subscription dates",
+        "operationId": "getApiCalendarRight-issue"
+      }
+    },
+    "/api/calendar/warrant": {
+      "get": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Get Warrant Calendar",
+        "description": "Get warrant listings with exercise price, trading period, and exercise period",
+        "operationId": "getApiCalendarWarrant"
+      }
+    },
+    "/api/calendar/rups": {
+      "get": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Get RUPS Calendar",
+        "description": "Get General Meeting of Shareholders (RUPS) schedule with date, time, venue, and eligible date",
+        "operationId": "getApiCalendarRups"
+      }
+    },
+    "/api/calendar/ipo": {
+      "get": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Get IPO Calendar",
+        "description": "Get Initial Public Offering schedule with listing date, offering period, price, and shares",
+        "operationId": "getApiCalendarIpo"
+      }
+    },
+    "/api/calendar/economic": {
+      "get": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Get Economic Calendar",
+        "description": "Get economic indicators and events with actual, previous, and forecast values",
+        "operationId": "getApiCalendarEconomic"
+      }
+    },
+    "/api/calendar/tender-offer": {
+      "get": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Get Tender Offer Calendar",
+        "description": "Get tender offer schedule with offer period, price, shares, and payment date",
+        "operationId": "getApiCalendarTender-offer"
+      }
+    },
+    "/api/calendar/today": {
+      "get": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Get Today's Corporate Actions",
+        "description": "Get all corporate action events happening today including dividend, bonus, stock split, right issue, warrant, RUPS, IPO, economic events, and tender offers",
+        "operationId": "getApiCalendarToday"
+      }
+    },
+    "/api/chart/{symbol}/{timeframe}": {
+      "get": {
+        "tags": [
+          "Chart"
+        ],
+        "summary": "Get OHLCV Chart Data",
+        "description": "Get Open, High, Low, Close, Volume (OHLCV) chart data for a stock symbol with specified timeframe",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol",
+              "minLength": 1,
+              "examples": [
+                "BBCA",
+                "BBRI",
+                "TLKM"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "timeframe",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Chart timeframe (use daily with different date ranges for weekly/monthly data)",
+              "enum": [
+                "daily",
+                "15m",
+                "30m",
+                "1h",
+                "2h",
+                "3h",
+                "4h"
+              ],
+              "examples": [
+                "daily",
+                "30m",
+                "1h"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Start date (YYYY-MM-DD) - newer date, auto-converted to unix timestamp for intraday intervals",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "examples": [
+                "2026-01-05"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "End date (YYYY-MM-DD) - older date, auto-converted to unix timestamp for intraday intervals",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "examples": [
+                "2024-11-11"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "description": "Limit number of results (0 = no limit)",
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "minimum": 0,
+                  "default": 0,
+                  "description": "Limit number of results (0 = no limit)",
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        ],
+        "operationId": "getApiChartBySymbolByTimeframe"
+      }
+    },
+    "/api/sectors/": {
+      "get": {
+        "tags": [
+          "Sectors"
+        ],
+        "summary": "Get All Sectors",
+        "description": "Get list of all available sectors",
+        "operationId": "getApiSectors"
+      }
+    },
+    "/api/sectors/{sectorId}/subsectors": {
+      "get": {
+        "tags": [
+          "Sectors"
+        ],
+        "summary": "Get SubSectors",
+        "description": "Get list of subsectors for a specific sector",
+        "parameters": [
+          {
+            "name": "sectorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Sector ID",
+              "minLength": 1,
+              "examples": [
+                "7",
+                "1",
+                "3"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiSectorsBySectorIdSubsectors"
+      }
+    },
+    "/api/sectors/{sectorId}/subsectors/{subSectorId}/companies": {
+      "get": {
+        "tags": [
+          "Sectors"
+        ],
+        "summary": "Get Companies by Sector & SubSector",
+        "description": "Get list of companies in a specific sector and subsector with detailed information including price, volume, market cap, etc.",
+        "parameters": [
+          {
+            "name": "sectorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Sector ID",
+              "minLength": 1,
+              "examples": [
+                "7",
+                "1",
+                "3"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "subSectorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "SubSector ID",
+              "minLength": 1,
+              "examples": [
+                "19",
+                "27"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiSectorsBySectorIdSubsectorsBySubSectorIdCompanies"
+      }
+    },
+    "/api/sectors/correlation/{sector}": {
+      "get": {
+        "tags": [
+          "Sectors"
+        ],
+        "summary": "Get Sector Correlation with Global Factors",
+        "description": "Analyze how global commodities, currencies, and indices affect IDX sectors. Shows current impact and outlook based on real-time global market data.",
+        "parameters": [
+          {
+            "name": "sector",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Sector name (energy, mining, plantation, banking, consumer, property, technology, transportation)",
+              "examples": [
+                "energy",
+                "mining",
+                "banking",
+                "consumer"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiSectorsCorrelationBySector"
+      }
+    },
+    "/api/movers/{moverType}": {
+      "get": {
+        "tags": [
+          "Movers"
+        ],
+        "summary": "Get Market Mover Data",
+        "description": "Get market mover data including top gainers, top losers, top value, top volume, and IEP-IEV data.\n                    \n**Regular Mover Types:**\n- `top-gainer` - Stocks with highest percentage gain\n- `top-loser` - Stocks with highest percentage loss\n- `top-value` - Stocks with highest trading value\n- `top-volume` - Stocks with highest trading volume\n- `top-frequency` - Stocks with highest trading frequency\n- `net-foreign-buy` - Stocks with highest net foreign buy\n- `net-foreign-sell` - Stocks with highest net foreign sell\n\n**IEP-IEV Mover Types (Special Monitoring Board):**\n- `iep-current-top-gainer` - IEP current top gainer\n- `iep-current-top-loser` - IEP current top loser\n- `iep-prev-top-gainer` - IEP previous top gainer\n- `iep-prev-top-loser` - IEP previous top loser\n- `iev-top-gainer` - IEV top gainer\n- `iev-top-loser` - IEV top loser\n- `ieval-top-gainer` - IEVAL top gainer\n- `ieval-top-loser` - IEVAL top loser\n\n**Filter Stocks:**\n- `FILTER_STOCKS_TYPE_MAIN_BOARD` - Main board stocks\n- `FILTER_STOCKS_TYPE_DEVELOPMENT_BOARD` - Development board stocks\n- `FILTER_STOCKS_TYPE_ACCELERATION_BOARD` - Acceleration board stocks\n- `FILTER_STOCKS_TYPE_NEW_ECONOMY_BOARD` - New economy board stocks\n- `FILTER_STOCKS_TYPE_SPECIAL_MONITORING_BOARD` - Special monitoring board (for IEP-IEV)",
+        "parameters": [
+          {
+            "name": "moverType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Market mover type",
+              "enum": [
+                "top-gainer",
+                "top-loser",
+                "top-value",
+                "top-volume",
+                "top-frequency",
+                "net-foreign-buy",
+                "net-foreign-sell",
+                "iep-current-top-gainer",
+                "iep-current-top-loser",
+                "iep-prev-top-gainer",
+                "iep-prev-top-loser",
+                "iev-top-gainer",
+                "iev-top-loser",
+                "ieval-top-gainer",
+                "ieval-top-loser"
+              ],
+              "examples": [
+                "top-gainer",
+                "top-loser",
+                "iep-current-top-gainer"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filterStocks",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Stock board filters (can be multiple)",
+              "default": [
+                "FILTER_STOCKS_TYPE_MAIN_BOARD",
+                "FILTER_STOCKS_TYPE_DEVELOPMENT_BOARD",
+                "FILTER_STOCKS_TYPE_ACCELERATION_BOARD",
+                "FILTER_STOCKS_TYPE_NEW_ECONOMY_BOARD"
+              ],
+              "type": "array",
+              "items": {
+                "enum": [
+                  "FILTER_STOCKS_TYPE_MAIN_BOARD",
+                  "FILTER_STOCKS_TYPE_DEVELOPMENT_BOARD",
+                  "FILTER_STOCKS_TYPE_ACCELERATION_BOARD",
+                  "FILTER_STOCKS_TYPE_NEW_ECONOMY_BOARD",
+                  "FILTER_STOCKS_TYPE_SPECIAL_MONITORING_BOARD"
+                ],
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "operationId": "getApiMoversByMoverType"
+      }
+    },
+    "/api/emiten/{symbol}/info": {
+      "get": {
+        "tags": [
+          "Emiten"
+        ],
+        "summary": "Get Emiten Info",
+        "description": "Get detailed information about a stock/emiten including price, volume, sector, and market data",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol",
+              "minLength": 1,
+              "examples": [
+                "BBCA",
+                "BUMI",
+                "TLKM"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiEmitenBySymbolInfo"
+      }
+    },
+    "/api/emiten/{symbol}/orderbook": {
+      "get": {
+        "tags": [
+          "Emiten"
+        ],
+        "summary": "Get Orderbook",
+        "description": "Get real-time orderbook data with bid and offer prices (NO CACHE - Real-time)",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol",
+              "minLength": 1,
+              "examples": [
+                "BBCA",
+                "BUMI",
+                "TLKM"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiEmitenBySymbolOrderbook"
+      }
+    },
+    "/api/emiten/running-trade": {
+      "get": {
+        "tags": [
+          "Emiten"
+        ],
+        "summary": "Get Running Trade",
+        "description": "Get real-time running trade data with filters (NO CACHE - Real-time)",
+        "parameters": [
+          {
+            "name": "symbols",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Array of stock symbols (optional - if not provided, returns all running trades)",
+              "examples": [
+                [
+                  "BBCA"
+                ],
+                [
+                  "BBCA",
+                  "BUMI"
+                ]
+              ],
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Sort order",
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "default": "DESC",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Limit results",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50,
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Limit results",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "default": 50,
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "orderBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Order by field",
+              "enum": [
+                "RUNNING_TRADE_ORDER_BY_TIME",
+                "RUNNING_TRADE_ORDER_BY_PRICE"
+              ],
+              "default": "RUNNING_TRADE_ORDER_BY_TIME",
+              "type": "string"
+            }
+          },
+          {
+            "name": "actionType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Action type filter",
+              "enum": [
+                "RUNNING_TRADE_ACTION_TYPE_ALL",
+                "RUNNING_TRADE_ACTION_TYPE_BUY",
+                "RUNNING_TRADE_ACTION_TYPE_SELL"
+              ],
+              "default": "RUNNING_TRADE_ACTION_TYPE_ALL",
+              "type": "string"
+            }
+          },
+          {
+            "name": "priceRangeFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Minimum price filter",
+              "minimum": 0,
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Minimum price filter",
+                  "minimum": 0,
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "priceRangeTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Maximum price filter",
+              "minimum": 0,
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Maximum price filter",
+                  "minimum": 0,
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "minimumLot",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Minimum lot filter",
+              "minimum": 1,
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Minimum lot filter",
+                  "minimum": 1,
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        ],
+        "operationId": "getApiEmitenRunning-trade"
+      }
+    },
+    "/api/emiten/tradebook-chart": {
+      "get": {
+        "tags": [
+          "Emiten"
+        ],
+        "summary": "Get Tradebook Chart",
+        "description": "Get tradebook chart data showing buy/sell frequency and lot over time (NO CACHE - Real-time). ⚠️ Hanya mendukung timeInterval=1m, interval lain tidak tersedia.",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol",
+              "minLength": 1,
+              "examples": [
+                "BBCA",
+                "BUMI",
+                "TLKM"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "timeInterval",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Time interval - ⚠️ Hanya mendukung 1m (1 menit). Interval lain tidak didukung oleh upstream API.",
+              "enum": [
+                "1m"
+              ],
+              "default": "1m",
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiEmitenTradebook-chart"
+      }
+    },
+    "/api/emiten/{symbol}/historical-summary": {
+      "get": {
+        "tags": [
+          "Emiten"
+        ],
+        "summary": "Get Historical Summary",
+        "description": "Get historical trading summary with OHLC, volume, value, and foreign flow data",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol",
+              "minLength": 1,
+              "examples": [
+                "BBCA",
+                "BUMI",
+                "TLKM"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Period type",
+              "enum": [
+                "HS_PERIOD_DAILY",
+                "HS_PERIOD_WEEKLY",
+                "HS_PERIOD_MONTHLY"
+              ],
+              "default": "HS_PERIOD_DAILY",
+              "type": "string"
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Start date (YYYY-MM-DD)",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "examples": [
+                "2025-01-05"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "End date (YYYY-MM-DD)",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "examples": [
+                "2026-01-05"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Limit results per page",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 12,
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Limit results per page",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "default": 12,
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Page number",
+              "minimum": 1,
+              "default": 1,
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Page number",
+                  "minimum": 1,
+                  "default": 1,
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        ],
+        "operationId": "getApiEmitenBySymbolHistorical-summary"
+      }
+    },
+    "/api/emiten/{symbol}/broker-trade-chart": {
+      "get": {
+        "tags": [
+          "Emiten"
+        ],
+        "summary": "Get Broker Trade Chart",
+        "description": "Get broker trading activity chart showing price and broker net buy/sell over time",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol",
+              "minLength": 1,
+              "examples": [
+                "BBCA",
+                "BUMI",
+                "TLKM"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Period",
+              "enum": [
+                "RT_PERIOD_LAST_7_DAYS",
+                "RT_PERIOD_LAST_30_DAYS",
+                "RT_PERIOD_LAST_90_DAYS"
+              ],
+              "default": "RT_PERIOD_LAST_7_DAYS",
+              "type": "string"
+            }
+          },
+          {
+            "name": "brokerCodes",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Array of broker codes",
+              "minItems": 1,
+              "examples": [
+                [
+                  "XL",
+                  "AK"
+                ],
+                [
+                  "BK",
+                  "YU",
+                  "XC"
+                ]
+              ],
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "operationId": "getApiEmitenBySymbolBroker-trade-chart"
+      }
+    },
+    "/api/emiten/{symbol}/seasonality": {
+      "get": {
+        "tags": [
+          "Emiten"
+        ],
+        "summary": "Get Seasonality Data",
+        "description": "Get historical seasonality data showing monthly and yearly price change patterns",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol",
+              "minLength": 1,
+              "examples": [
+                "BBCA",
+                "BUMI",
+                "TLKM"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Target year",
+              "minimum": 2000,
+              "maximum": 2100,
+              "examples": [
+                2026
+              ],
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Target year",
+                  "minimum": 2000,
+                  "maximum": 2100,
+                  "examples": [
+                    2026
+                  ],
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "backYear",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Number of years to look back",
+              "minimum": 1,
+              "maximum": 20,
+              "default": 5,
+              "examples": [
+                5,
+                10
+              ],
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Number of years to look back",
+                  "minimum": 1,
+                  "maximum": 20,
+                  "default": 5,
+                  "examples": [
+                    5,
+                    10
+                  ],
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        ],
+        "operationId": "getApiEmitenBySymbolSeasonality"
+      }
+    },
+    "/api/emiten/{symbol}/profile": {
+      "get": {
+        "tags": [
+          "Emiten"
+        ],
+        "summary": "Get Profile Background",
+        "description": "Get company profile including background, history, executives, shareholders, and subsidiaries",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol",
+              "minLength": 1,
+              "examples": [
+                "BBCA",
+                "BUMI",
+                "TLKM"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiEmitenBySymbolProfile"
+      }
+    },
+    "/api/emiten/{symbol}/subsidiary": {
+      "get": {
+        "tags": [
+          "Emiten"
+        ],
+        "summary": "Get Subsidiary Data",
+        "description": "Get detailed subsidiary company information including assets and ownership percentage",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol",
+              "minLength": 1,
+              "examples": [
+                "BBCA",
+                "BUMI",
+                "TLKM"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiEmitenBySymbolSubsidiary"
+      }
+    },
+    "/api/emiten/{symbol}/keystats": {
+      "get": {
+        "tags": [
+          "Emiten"
+        ],
+        "summary": "Get Keystats Data",
+        "description": "Get comprehensive financial statistics including valuation ratios, profitability metrics, growth rates, and historical financial data",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol",
+              "minLength": 1,
+              "examples": [
+                "BBCA",
+                "BUMI",
+                "TLKM"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "year_limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Number of years to retrieve (default: 10)",
+              "default": 10,
+              "minimum": 1,
+              "maximum": 20,
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Number of years to retrieve (default: 10)",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 20,
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        ],
+        "operationId": "getApiEmitenBySymbolKeystats"
+      }
+    },
+    "/api/emiten/insider": {
+      "get": {
+        "tags": [
+          "Emiten"
+        ],
+        "summary": "Get All Insider Trading Data",
+        "description": "Get major shareholder and insider trading movements across all stocks. Optionally filter by specific symbols (comma-separated).",
+        "parameters": [
+          {
+            "name": "symbols",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Comma-separated stock symbols (optional - if not provided, returns all insider activity)",
+              "examples": [
+                "BBCA,BUMI,TLKM"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "description": "Page number for pagination",
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "minimum": 1,
+                  "default": 1,
+                  "description": "Page number for pagination",
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "description": "Number of items per page",
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "minimum": 1,
+                  "maximum": 100,
+                  "default": 20,
+                  "description": "Number of items per page",
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "action_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Filter by action type: BUY, SELL, CROSS (crossing), TRANSFER, CORPACTION (corporate action)",
+              "enum": [
+                "ACTION_TYPE_UNSPECIFIED",
+                "ACTION_TYPE_BUY",
+                "ACTION_TYPE_SELL",
+                "ACTION_TYPE_CROSS",
+                "ACTION_TYPE_TRANSFER",
+                "ACTION_TYPE_CORPACTION"
+              ],
+              "default": "ACTION_TYPE_UNSPECIFIED",
+              "type": "string"
+            }
+          },
+          {
+            "name": "source_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Filter by data source",
+              "enum": [
+                "SOURCE_TYPE_UNSPECIFIED",
+                "SOURCE_TYPE_IDX",
+                "SOURCE_TYPE_KSEI"
+              ],
+              "default": "SOURCE_TYPE_UNSPECIFIED",
+              "type": "string"
+            }
+          },
+          {
+            "name": "date_start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Filter by start date (YYYY-MM-DD)",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "examples": [
+                "2025-11-01"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "date_end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Filter by end date (YYYY-MM-DD)",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "examples": [
+                "2025-12-31"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiEmitenInsider"
+      }
+    },
+    "/api/emiten/{symbol}/insider": {
+      "get": {
+        "tags": [
+          "Emiten"
+        ],
+        "summary": "Get Insider Trading Data by Symbol",
+        "description": "Get major shareholder and insider trading movements for a specific stock symbol.",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol",
+              "minLength": 1,
+              "examples": [
+                "BBCA",
+                "BUMI",
+                "TLKM"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "description": "Page number for pagination",
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "minimum": 1,
+                  "default": 1,
+                  "description": "Page number for pagination",
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "description": "Number of items per page",
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "minimum": 1,
+                  "maximum": 100,
+                  "default": 20,
+                  "description": "Number of items per page",
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "action_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Filter by action type: BUY, SELL, CROSS (crossing), TRANSFER, CORPACTION (corporate action)",
+              "enum": [
+                "ACTION_TYPE_UNSPECIFIED",
+                "ACTION_TYPE_BUY",
+                "ACTION_TYPE_SELL",
+                "ACTION_TYPE_CROSS",
+                "ACTION_TYPE_TRANSFER",
+                "ACTION_TYPE_CORPACTION"
+              ],
+              "default": "ACTION_TYPE_UNSPECIFIED",
+              "type": "string"
+            }
+          },
+          {
+            "name": "source_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Filter by data source",
+              "enum": [
+                "SOURCE_TYPE_UNSPECIFIED",
+                "SOURCE_TYPE_IDX",
+                "SOURCE_TYPE_KSEI"
+              ],
+              "default": "SOURCE_TYPE_UNSPECIFIED",
+              "type": "string"
+            }
+          },
+          {
+            "name": "date_start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Filter by start date (YYYY-MM-DD)",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "examples": [
+                "2025-11-01"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "date_end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Filter by end date (YYYY-MM-DD)",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "examples": [
+                "2025-12-31"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiEmitenBySymbolInsider"
+      }
+    },
+    "/api/emiten/fundachart": {
+      "get": {
+        "tags": [
+          "Emiten"
+        ],
+        "summary": "Get Fundachart Data",
+        "description": "Get fundamental chart data untuk metric finansial. Item ID berlaku universal untuk semua symbol. Gunakan /api/emiten/fundachart/metrics untuk daftar lengkap item ID.",
+        "parameters": [
+          {
+            "name": "item",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Item ID untuk metric finansial (berlaku sama untuk semua symbol).\nGunakan /api/emiten/fundachart/metrics untuk daftar lengkap.\nContoh populer:\n• 2661 = PE Ratio (TTM)\n• 2891 = PBV (Price to Book Value)\n• 1458 = EPS (TTM)\n• 1466 = ROE (TTM)\n• 1464 = ROA (TTM)\n• 2538 = Free Cash Flow (TTM)\n• 1508 = Debt to Equity Ratio",
+              "minLength": 1,
+              "examples": [
+                "2661",
+                "2891",
+                "1458",
+                "1466"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "companies",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol, bisa multiple dengan comma separator",
+              "minLength": 1,
+              "examples": [
+                "BUMI",
+                "BBCA,TLKM,BMRI"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "timeframe",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Rentang waktu data chart",
+              "enum": [
+                "1y",
+                "3y",
+                "5y",
+                "10y"
+              ],
+              "default": "1y",
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiEmitenFundachart"
+      }
+    },
+    "/api/emiten/fundachart/metrics": {
+      "get": {
+        "tags": [
+          "Emiten"
+        ],
+        "summary": "Get Fundachart Metrics (Daftar Item ID)",
+        "description": "Mendapatkan daftar lengkap item ID untuk fundachart. Item ID berlaku sama untuk semua symbol. Kategori: Size, Valuation, Profitability, Income Statement, Balance Sheet, Cash Flow, Solvency, dll.",
+        "parameters": [
+          {
+            "name": "metric_name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Metric name to filter",
+              "default": "fundachart",
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiEmitenFundachartMetrics"
+      }
+    },
+    "/api/emiten/{symbol}/financials": {
+      "get": {
+        "tags": [
+          "Emiten"
+        ],
+        "summary": "Get Company Financials",
+        "description": "Get company financial statements including Income Statement, Balance Sheet, and Cash Flow with various statement types (Quarterly, Annual, TTM, Growth rates, etc.)\n\n**Report Type (report_type):**\n- 1 = Income Statement (Laporan Laba Rugi)\n- 2 = Balance Sheet (Neraca)\n- 3 = Cash Flow (Arus Kas)\n\n**Statement Type (statement_type):**\n- 1 = Quarterly (Kuartalan)\n- 2 = Annual (Tahunan)\n- 3 = TTM (Trailing Twelve Months)\n- 4 = Interim YTD (Year to Date)\n- 5 = Q1 (Kuartal 1)\n- 6 = Q2 (Kuartal 2)\n- 7 = Q3 (Kuartal 3)\n- 8 = Q4 (Kuartal 4)\n- 9 = QoQ Growth (Quarter over Quarter)\n- 10 = Quarter YoY Growth\n- 11 = YTD YoY Growth\n- 12 = Annual YoY Growth\n- 13 = 3 Year CAGR",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol",
+              "minLength": 1,
+              "examples": [
+                "BUMI",
+                "BBCA",
+                "TLKM"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "data_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Data type (default: 1 = standard financial data)",
+              "default": 1,
+              "minimum": 1,
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Data type (default: 1 = standard financial data)",
+                  "default": 1,
+                  "minimum": 1,
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "report_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Report type (required):\n• 1 = Income Statement (Laporan Laba Rugi)\n• 2 = Balance Sheet (Neraca)\n• 3 = Cash Flow (Arus Kas)",
+              "minimum": 1,
+              "maximum": 3,
+              "examples": [
+                1,
+                2,
+                3
+              ],
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Report type (required):\n• 1 = Income Statement (Laporan Laba Rugi)\n• 2 = Balance Sheet (Neraca)\n• 3 = Cash Flow (Arus Kas)",
+                  "minimum": 1,
+                  "maximum": 3,
+                  "examples": [
+                    1,
+                    2,
+                    3
+                  ],
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "statement_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Statement type (required):\n• 1 = Quarterly (Kuartalan)\n• 2 = Annual (Tahunan)\n• 3 = TTM (Trailing Twelve Months)\n• 4 = Interim YTD (Year to Date)\n• 5 = Q1 (Kuartal 1)\n• 6 = Q2 (Kuartal 2)\n• 7 = Q3 (Kuartal 3)\n• 8 = Q4 (Kuartal 4)\n• 9 = QoQ Growth (Quarter over Quarter)\n• 10 = Quarter YoY Growth\n• 11 = YTD YoY Growth\n• 12 = Annual YoY Growth\n• 13 = 3 Year CAGR",
+              "minimum": 1,
+              "maximum": 13,
+              "examples": [
+                1,
+                2,
+                11
+              ],
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Statement type (required):\n• 1 = Quarterly (Kuartalan)\n• 2 = Annual (Tahunan)\n• 3 = TTM (Trailing Twelve Months)\n• 4 = Interim YTD (Year to Date)\n• 5 = Q1 (Kuartal 1)\n• 6 = Q2 (Kuartal 2)\n• 7 = Q3 (Kuartal 3)\n• 8 = Q4 (Kuartal 4)\n• 9 = QoQ Growth (Quarter over Quarter)\n• 10 = Quarter YoY Growth\n• 11 = YTD YoY Growth\n• 12 = Annual YoY Growth\n• 13 = 3 Year CAGR",
+                  "minimum": 1,
+                  "maximum": 13,
+                  "examples": [
+                    1,
+                    2,
+                    11
+                  ],
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        ],
+        "operationId": "getApiEmitenBySymbolFinancials"
+      }
+    },
+    "/api/emiten/{symbol}/profile/holding-composition": {
+      "get": {
+        "tags": [
+          "Emiten"
+        ],
+        "summary": "Get Holding Composition",
+        "description": "Get shareholder composition chart data over time. Shows ownership distribution by foreign investors, local investors, or all combined.",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol",
+              "minLength": 1,
+              "examples": [
+                "BBCA",
+                "BUMI",
+                "TLKM"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "value",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Period in months: 5 (5 months), 12 (1 year), 24 (2 years), 36 (3 years)",
+              "examples": [
+                5,
+                12,
+                24,
+                36
+              ],
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Period in months: 5 (5 months), 12 (1 year), 24 (2 years), 36 (3 years)",
+                  "examples": [
+                    5,
+                    12,
+                    24,
+                    36
+                  ],
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Shareholder type: all, foreign, local",
+              "enum": [
+                "all",
+                "foreign",
+                "local"
+              ],
+              "examples": [
+                "all",
+                "foreign",
+                "local"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiEmitenBySymbolProfileHolding-composition"
+      }
+    },
+    "/api/emiten/{symbol}/foreign-ownership": {
+      "get": {
+        "tags": [
+          "Emiten"
+        ],
+        "summary": "Get Foreign Institutional Ownership",
+        "description": "Get foreign institutional and fund ownership data for IDX stocks. Shows ownership by major funds like Vanguard, BlackRock, Fidelity, etc. with recent changes to detect accumulation/distribution.",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol (with or without .JK suffix)",
+              "minLength": 1,
+              "examples": [
+                "BBCA",
+                "BBCA.JK",
+                "TLKM",
+                "TLKM.JK"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiEmitenBySymbolForeign-ownership"
+      }
+    },
+    "/api/analysis/bandar/accumulation/{symbol}": {
+      "get": {
+        "tags": [
+          "Bandarmology"
+        ],
+        "summary": "Bandar Accumulation Detector",
+        "description": "Detects if market makers (bandar) are accumulating a stock based on broker concentration, volume-price divergence, and foreign flow patterns",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol",
+              "minLength": 1,
+              "examples": [
+                "BUMI",
+                "BBCA",
+                "TLKM"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "minimum": 7,
+              "maximum": 90,
+              "default": 30,
+              "description": "Jumlah hari untuk analisis. Nilai yang didukung: 7-90 hari. Default: 30 hari.",
+              "examples": [
+                7,
+                14,
+                30,
+                60,
+                90
+              ],
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "minimum": 7,
+                  "maximum": 90,
+                  "default": 30,
+                  "description": "Jumlah hari untuk analisis. Nilai yang didukung: 7-90 hari. Default: 30 hari.",
+                  "examples": [
+                    7,
+                    14,
+                    30,
+                    60,
+                    90
+                  ],
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        ],
+        "operationId": "getApiAnalysisBandarAccumulationBySymbol"
+      }
+    },
+    "/api/analysis/bandar/distribution/{symbol}": {
+      "get": {
+        "tags": [
+          "Bandarmology"
+        ],
+        "summary": "Bandar Distribution Detector",
+        "description": "Detects if market makers (bandar) are distributing (selling) a stock - signals time to exit",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol",
+              "minLength": 1,
+              "examples": [
+                "BUMI",
+                "BBCA",
+                "TLKM"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "minimum": 7,
+              "maximum": 90,
+              "default": 30,
+              "description": "Jumlah hari untuk analisis. Nilai yang didukung: 7-90 hari. Default: 30 hari.",
+              "examples": [
+                7,
+                14,
+                30,
+                60,
+                90
+              ],
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "minimum": 7,
+                  "maximum": 90,
+                  "default": 30,
+                  "description": "Jumlah hari untuk analisis. Nilai yang didukung: 7-90 hari. Default: 30 hari.",
+                  "examples": [
+                    7,
+                    14,
+                    30,
+                    60,
+                    90
+                  ],
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        ],
+        "operationId": "getApiAnalysisBandarDistributionBySymbol"
+      }
+    },
+    "/api/analysis/bandar/smart-money/{symbol}": {
+      "get": {
+        "tags": [
+          "Bandarmology"
+        ],
+        "summary": "Smart Money Flow Tracker",
+        "description": "Tracks movement of smart money (institutions, foreign investors, big brokers)",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol",
+              "minLength": 1,
+              "examples": [
+                "BUMI",
+                "BBCA",
+                "TLKM"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "minimum": 7,
+              "maximum": 90,
+              "default": 30,
+              "description": "Jumlah hari untuk analisis. Nilai yang didukung: 7-90 hari. Default: 30 hari.",
+              "examples": [
+                7,
+                14,
+                30,
+                60,
+                90
+              ],
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "minimum": 7,
+                  "maximum": 90,
+                  "default": 30,
+                  "description": "Jumlah hari untuk analisis. Nilai yang didukung: 7-90 hari. Default: 30 hari.",
+                  "examples": [
+                    7,
+                    14,
+                    30,
+                    60,
+                    90
+                  ],
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        ],
+        "operationId": "getApiAnalysisBandarSmart-moneyBySymbol"
+      }
+    },
+    "/api/analysis/bandar/pump-dump/{symbol}": {
+      "get": {
+        "tags": [
+          "Bandarmology"
+        ],
+        "summary": "Pump & Dump Detector",
+        "description": "Detects pump & dump schemes to protect retail investors from manipulation",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol",
+              "minLength": 1,
+              "examples": [
+                "BUMI",
+                "BBCA",
+                "TLKM"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "minimum": 7,
+              "maximum": 30,
+              "default": 14,
+              "description": "Jumlah hari untuk analisis pump/dump. Nilai yang didukung: 7-30 hari (lebih pendek untuk deteksi pump). Default: 14 hari.",
+              "examples": [
+                7,
+                14,
+                21,
+                30
+              ],
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "minimum": 7,
+                  "maximum": 30,
+                  "default": 14,
+                  "description": "Jumlah hari untuk analisis pump/dump. Nilai yang didukung: 7-30 hari (lebih pendek untuk deteksi pump). Default: 14 hari.",
+                  "examples": [
+                    7,
+                    14,
+                    21,
+                    30
+                  ],
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        ],
+        "operationId": "getApiAnalysisBandarPump-dumpBySymbol"
+      }
+    },
+    "/api/analysis/retail/multibagger/scan": {
+      "get": {
+        "tags": [
+          "Retail Opportunity"
+        ],
+        "summary": "Multibagger Candidate Scanner",
+        "description": "Scan for stocks with potential 2x-10x returns based on multiple factors:\n\n**Scoring Factors:**\n- Technical Analysis (25%): Price position vs 52-week range, trend direction\n- Volume Analysis (20%): Volume surge, unusual volume detection\n- Foreign Flow (25%): Net foreign accumulation, consecutive buy days\n- Bandar Accumulation (30%): Market maker activity, accumulation status\n\n**Output includes:**\n- Multibagger score (0-100)\n- Potential return estimate (e.g., \"2x-5x\")\n- Entry zone with ideal and max prices\n- Target prices with probabilities\n- Risk level and stop loss recommendation\n\n**Use Cases:**\n- Find undervalued stocks with high growth potential\n- Identify stocks being accumulated by smart money\n- Screen for breakout candidates",
+        "parameters": [
+          {
+            "name": "min_score",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Skor minimum multibagger (0-100). Semakin tinggi skor, semakin potensial saham menjadi multibagger. Default: 50",
+              "default": 50,
+              "minimum": 0,
+              "maximum": 100,
+              "examples": [
+                30,
+                50,
+                70,
+                80
+              ],
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Skor minimum multibagger (0-100). Semakin tinggi skor, semakin potensial saham menjadi multibagger. Default: 50",
+                  "default": 50,
+                  "minimum": 0,
+                  "maximum": 100,
+                  "examples": [
+                    30,
+                    50,
+                    70,
+                    80
+                  ],
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "sector",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Filter berdasarkan nama sektor",
+              "examples": [
+                "Keuangan",
+                "Energi",
+                "Teknologi",
+                "Kesehatan"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "max_results",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Jumlah maksimal hasil yang ditampilkan. Range: 1-50. Default: 20",
+              "default": 20,
+              "minimum": 1,
+              "maximum": 50,
+              "examples": [
+                10,
+                20,
+                30,
+                50
+              ],
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Jumlah maksimal hasil yang ditampilkan. Range: 1-50. Default: 20",
+                  "default": 20,
+                  "minimum": 1,
+                  "maximum": 50,
+                  "examples": [
+                    10,
+                    20,
+                    30,
+                    50
+                  ],
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        ],
+        "operationId": "getApiAnalysisRetailMultibaggerScan"
+      }
+    },
+    "/api/analysis/retail/breakout/alerts": {
+      "get": {
+        "tags": [
+          "Retail Opportunity"
+        ],
+        "summary": "Breakout Alert System",
+        "description": "Real-time alerts for stocks that are breaking out or about to break out.\n\n**Alert Types:**\n- `VOLUME_BREAKOUT`: High volume surge with price movement\n- `PRICE_BREAKOUT`: Breaking above resistance level\n- `RESISTANCE_TEST`: Approaching resistance with momentum\n- `SUPPORT_TEST`: Testing support level with volume\n\n**Severity Levels:**\n- `HIGH`: Strong breakout signal, immediate action recommended\n- `MEDIUM`: Moderate signal, prepare for entry\n- `LOW`: Early signal, monitor closely\n\n**Output includes:**\n- Alert type and severity\n- Volume vs average comparison\n- Support and resistance levels\n- Breakout probability\n- Entry trigger conditions\n- Target and stop loss levels\n\n**Use Cases:**\n- Catch breakouts early for momentum trading\n- Identify stocks with unusual volume activity\n- Get real-time trading signals",
+        "operationId": "getApiAnalysisRetailBreakoutAlerts"
+      }
+    },
+    "/api/analysis/retail/risk-reward/{symbol}": {
+      "get": {
+        "tags": [
+          "Retail Opportunity"
+        ],
+        "summary": "Risk-Reward Calculator",
+        "description": "Calculate risk-reward ratio and position sizing for a stock.\n\n**Technical Analysis:**\n- Support and resistance levels (3 levels each)\n- Pivot points (Classic formula)\n- ATR (Average True Range) for volatility\n\n**Risk-Reward Calculation:**\n- Stop loss recommendation based on support and ATR\n- Multiple target prices with probabilities\n- Risk-reward ratio for each target\n\n**Position Sizing:**\n- Maximum position as % of portfolio\n- Suggested number of shares\n- Total investment amount\n- Maximum loss amount\n\n**Recommendation Levels:**\n- `EXCELLENT_SETUP`: R:R >= 3:1\n- `GOOD_SETUP`: R:R >= 2:1\n- `FAIR_SETUP`: R:R >= 1.5:1\n- `POOR_SETUP`: R:R < 1.5:1\n\n**Use Cases:**\n- Plan entry and exit before trading\n- Calculate proper position size\n- Manage risk effectively",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol",
+              "examples": [
+                "BBCA",
+                "BUMI",
+                "ANTM"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Jumlah hari untuk analisis historis. Range: 7-90 hari. Default: 30 hari",
+              "default": 30,
+              "minimum": 7,
+              "maximum": 90,
+              "examples": [
+                7,
+                14,
+                30,
+                60,
+                90
+              ],
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Jumlah hari untuk analisis historis. Range: 7-90 hari. Default: 30 hari",
+                  "default": 30,
+                  "minimum": 7,
+                  "maximum": 90,
+                  "examples": [
+                    7,
+                    14,
+                    30,
+                    60,
+                    90
+                  ],
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "portfolio_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Ukuran portfolio dalam Rupiah untuk kalkulasi position sizing. Minimum: Rp 1.000.000. Default: Rp 100.000.000",
+              "default": 100000000,
+              "minimum": 1000000,
+              "examples": [
+                10000000,
+                50000000,
+                100000000,
+                500000000
+              ],
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Ukuran portfolio dalam Rupiah untuk kalkulasi position sizing. Minimum: Rp 1.000.000. Default: Rp 100.000.000",
+                  "default": 100000000,
+                  "minimum": 1000000,
+                  "examples": [
+                    10000000,
+                    50000000,
+                    100000000,
+                    500000000
+                  ],
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "risk_percent",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Persentase risiko maksimal per trade. Range: 0.5-10%. Default: 2%",
+              "default": 2,
+              "minimum": 0.5,
+              "maximum": 10,
+              "examples": [
+                1,
+                2,
+                3,
+                5
+              ],
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Persentase risiko maksimal per trade. Range: 0.5-10%. Default: 2%",
+                  "default": 2,
+                  "minimum": 0.5,
+                  "maximum": 10,
+                  "examples": [
+                    1,
+                    2,
+                    3,
+                    5
+                  ],
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        ],
+        "operationId": "getApiAnalysisRetailRisk-rewardBySymbol"
+      }
+    },
+    "/api/analysis/retail/sector-rotation": {
+      "get": {
+        "tags": [
+          "Retail Opportunity"
+        ],
+        "summary": "Sector Rotation Analyzer",
+        "description": "Analyze sector rotation to identify hot and cold sectors for timing entry/exit.\n\n**Market Phase Detection:**\n- `EARLY_EXPANSION`: Market starting to recover\n- `LATE_EXPANSION`: Market in full bull mode\n- `EARLY_CONTRACTION`: Market starting to weaken\n- `LATE_CONTRACTION`: Market in full bear mode\n- `NEUTRAL`: No clear direction\n\n**Sector Status:**\n- `LEADING`: Strong momentum, outperforming market\n- `IMPROVING`: Gaining momentum, potential leader\n- `WEAKENING`: Losing momentum, potential laggard\n- `LAGGING`: Weak momentum, underperforming market\n\n**Sector Recommendations:**\n- `OVERWEIGHT`: Increase allocation to this sector\n- `NEUTRAL`: Maintain current allocation\n- `UNDERWEIGHT`: Reduce allocation to this sector\n\n**Output includes:**\n- Hot sectors (momentum score >= 6)\n- Cold sectors (momentum score < 4)\n- All sectors with detailed metrics\n- Top stocks per sector\n- Foreign flow estimation\n- Market phase summary\n\n**Use Cases:**\n- Identify sectors to focus on\n- Time sector rotation trades\n- Understand market cycle position",
+        "operationId": "getApiAnalysisRetailSector-rotation"
+      }
+    },
+    "/api/analysis/sentiment/{symbol}": {
+      "get": {
+        "tags": [
+          "Market Sentiment"
+        ],
+        "summary": "Retail vs Bandar Sentiment Analysis",
+        "description": "Analyze sentiment divergence between retail traders and institutional investors (bandar).\n\n**Retail Sentiment Indicators:**\n- `frequency_score`: Trading frequency (higher = more retail activity)\n- `small_lot_percentage`: Percentage of small lot transactions\n- `fomo_score`: Fear of missing out indicator\n- `volume_participation`: Retail volume participation\n\n**Retail Status:**\n- `EUPHORIC`: Extreme bullish, high FOMO (DANGER - potential top)\n- `BULLISH`: Positive sentiment\n- `NEUTRAL`: No clear direction\n- `FEARFUL`: Negative sentiment\n- `PANIC`: Extreme bearish (potential bottom)\n\n**Bandar Sentiment Indicators:**\n- `top_broker_net_flow`: Net flow from top 5 brokers\n- `large_lot_percentage`: Percentage of large lot transactions\n- `accumulation_score`: Accumulation/distribution score\n- `foreign_flow`: Foreign investor net flow\n- `institutional_flow`: Institutional (Pemerintah) net flow\n\n**Bandar Status:**\n- `ACCUMULATING`: Smart money buying\n- `HOLDING`: Maintaining positions\n- `NEUTRAL`: No clear direction\n- `DISTRIBUTING`: Smart money selling\n- `EXITING`: Smart money exiting\n\n**Divergence Types:**\n- `RETAIL_EUPHORIC_BANDAR_EXIT`: ⚠️ DANGER - Retail FOMO while bandar exits\n- `RETAIL_PANIC_BANDAR_ACCUMULATE`: 🎯 OPPORTUNITY - Retail panic while bandar accumulates\n- `ALIGNED_BULLISH`: Both bullish - strong momentum\n- `ALIGNED_BEARISH`: Both bearish - strong downtrend\n- `NEUTRAL`: No significant divergence\n\n**Use Cases:**\n- Identify potential market tops (retail euphoria + bandar exit)\n- Find buying opportunities (retail panic + bandar accumulation)\n- Confirm trend strength (aligned sentiment)",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol",
+              "examples": [
+                "BBCA",
+                "BUMI",
+                "TLKM"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Jumlah hari untuk analisis sentiment. Range: 1-30 hari. Default: 7 hari",
+              "examples": [
+                7,
+                14,
+                21,
+                30
+              ],
+              "default": 7,
+              "minimum": 1,
+              "maximum": 30,
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Jumlah hari untuk analisis sentiment. Range: 1-30 hari. Default: 7 hari",
+                  "examples": [
+                    7,
+                    14,
+                    21,
+                    30
+                  ],
+                  "default": 7,
+                  "minimum": 1,
+                  "maximum": 30,
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        ],
+        "operationId": "getApiAnalysisSentimentBySymbol"
+      }
+    },
+    "/api/analysis/sentiment/ipo/momentum": {
+      "get": {
+        "tags": [
+          "Market Sentiment"
+        ],
+        "summary": "IPO Momentum Tracker",
+        "description": "Track and analyze IPO momentum for trading opportunities.\n\n**IPO Momentum Score (0-10):**\nBased on multiple factors:\n- Market condition (bullish/bearish)\n- Underwriter quality (Tier 1/2/3)\n- Price attractiveness\n- Offering size\n\n**Underwriter Tiers:**\n- `TIER_1`: Major securities (Mandiri, BCA, Trimegah, Indo Premier, etc.)\n- `TIER_2`: Mid-tier securities (Henan Putihrai, Sucor, Samuel, etc.)\n- `TIER_3`: Smaller securities\n\n**IPO Status:**\n- `UPCOMING`: Not yet in offering period\n- `OFFERING`: Currently in offering period\n- `LISTED`: Already listed on exchange\n- `PAST`: Listed more than 30 days ago\n\n**Strategy Recommendations:**\n- `STRONG_APPLY`: High momentum, apply for allocation\n- `APPLY`: Good momentum, consider applying\n- `CONSIDER`: Moderate momentum, evaluate carefully\n- `AVOID`: Low momentum, high risk\n\n**Output includes:**\n- Upcoming IPOs with momentum analysis\n- Recent IPOs (within 30 days) with performance\n- Market sentiment assessment\n- Hot sectors identification\n\n**Use Cases:**\n- Identify high-potential IPOs for allocation\n- Track recent IPO performance\n- Time IPO trading strategies",
+        "operationId": "getApiAnalysisSentimentIpoMomentum"
+      }
+    },
+    "/api/analysis/correlation": {
+      "get": {
+        "tags": [
+          "Advanced Analytics"
+        ],
+        "summary": "Correlation Matrix Calculator",
+        "description": "Calculate price correlation between multiple stocks for portfolio diversification analysis.\n\n**Correlation Values:**\n- `1.0`: Perfect positive correlation (move together)\n- `0.0`: No correlation (independent movement)\n- `-1.0`: Perfect negative correlation (move opposite)\n\n**Correlation Strength:**\n- `STRONG_POSITIVE`: >= 0.7 (avoid holding together)\n- `MODERATE_POSITIVE`: 0.3 to 0.7\n- `WEAK`: -0.3 to 0.3 (good for diversification)\n- `MODERATE_NEGATIVE`: -0.7 to -0.3\n- `STRONG_NEGATIVE`: <= -0.7 (good for hedging)\n\n**Output includes:**\n- NxN correlation matrix\n- All unique pairs with correlation values\n- Insights: highly correlated, inversely correlated, uncorrelated pairs\n- Per-symbol analysis with average correlation\n- Trading implications and recommendations\n\n**Use Cases:**\n- Portfolio diversification analysis\n- Identify hedging opportunities\n- Sector correlation analysis\n- Risk management",
+        "parameters": [
+          {
+            "name": "symbols",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Stock symbols dipisahkan koma untuk menghitung korelasi antar saham",
+              "examples": [
+                "BBCA,BBRI,BMRI,TLKM",
+                "ADRO,PTBA,ITMG"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "period_days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Jumlah hari untuk kalkulasi korelasi. Range: 7-365 hari. Default: 30 hari",
+              "default": 30,
+              "minimum": 7,
+              "maximum": 365,
+              "examples": [
+                7,
+                30,
+                60,
+                90,
+                180,
+                365
+              ],
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Jumlah hari untuk kalkulasi korelasi. Range: 7-365 hari. Default: 30 hari",
+                  "default": 30,
+                  "minimum": 7,
+                  "maximum": 365,
+                  "examples": [
+                    7,
+                    30,
+                    60,
+                    90,
+                    180,
+                    365
+                  ],
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        ],
+        "operationId": "getApiAnalysisCorrelation"
+      }
+    },
+    "/api/analysis/whale-transactions/{symbol}": {
+      "get": {
+        "tags": [
+          "Advanced Analytics"
+        ],
+        "summary": "Whale Transaction Detector",
+        "description": "Detect and analyze large institutional transactions (whale activity).\n\n**Whale Types:**\n- `MEGA_WHALE`: >= 10x minimum lot threshold\n- `LARGE_WHALE`: >= 3x minimum lot threshold\n- `MEDIUM_WHALE`: >= minimum lot threshold\n\n**Whale Activity Summary:**\n- Total whale buy/sell value\n- Net whale flow\n- Dominant action (ACCUMULATION/DISTRIBUTION/NEUTRAL)\n- Whale intensity (EXTREME/HIGH/MODERATE/LOW)\n\n**Top Whale Brokers:**\n- Broker code and type (Asing/Lokal/Pemerintah)\n- Net value and lot\n- Whale score (0-10)\n- Action (ACCUMULATING/DISTRIBUTING)\n\n**Prediction:**\n- Short-term direction (BULLISH/BEARISH/NEUTRAL)\n- Confidence level (0-100%)\n- Reasoning\n\n**Alerts:**\n- Mega whale transactions\n- Extreme activity warnings\n- Foreign flow alerts\n- Accumulation/Distribution signals\n\n**Use Cases:**\n- Follow smart money\n- Detect institutional accumulation/distribution\n- Time entry/exit based on whale activity\n- Monitor foreign investor flow",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol",
+              "examples": [
+                "BBCA",
+                "BUMI",
+                "TLKM"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "min_lot",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Minimum lot threshold untuk deteksi transaksi whale. Range: 100-10.000 lot. Default: 500 lot",
+              "default": 500,
+              "minimum": 100,
+              "maximum": 10000,
+              "examples": [
+                100,
+                500,
+                1000,
+                5000,
+                10000
+              ],
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Minimum lot threshold untuk deteksi transaksi whale. Range: 100-10.000 lot. Default: 500 lot",
+                  "default": 500,
+                  "minimum": 100,
+                  "maximum": 10000,
+                  "examples": [
+                    100,
+                    500,
+                    1000,
+                    5000,
+                    10000
+                  ],
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        ],
+        "operationId": "getApiAnalysisWhale-transactionsBySymbol"
+      }
+    },
+    "/api/analysis/insider-screening": {
+      "get": {
+        "tags": [
+          "Advanced Analytics"
+        ],
+        "summary": "Insider Screening (Scriptless)",
+        "description": "Screen insider/major holder activity across all stocks with various filters.\n\n**Flow yang direkomendasikan:**\n1. Scan semua saham tanpa symbol untuk cari insider activity\n2. Filter by min_ownership >= 5% untuk cari insider dengan kepemilikan signifikan\n3. Filter by min_percentage >= 1% untuk cari perubahan signifikan\n4. Filter by source KSEI (data bulanan, lebih akurat untuk akumulasi)\n5. Filter by period (misal 2025-12 untuk Desember 2025)\n6. Setelah dapat symbol, gunakan endpoint /insider-net/:symbols untuk total akumulasi\n\n**Filters:**\n- `symbols`: Comma-separated symbols (optional - kosongkan untuk scan semua)\n- `min_percentage`: Filter insider dengan PERUBAHAN kepemilikan >= X%\n- `min_ownership`: Filter insider dengan KEPEMILIKAN SAAT INI >= X% (misal 5 untuk >= 5%)\n- `source_type`: SOURCE_TYPE_KSEI (bulanan) atau SOURCE_TYPE_IDX (harian)\n- `action_type`: ACTION_TYPE_BUY atau ACTION_TYPE_SELL\n- `period`: Format YYYY-MM atau YYYY-MM-DD\n\n**Output:**\n- Summary: total movements, buy/sell count, net value, dominant action\n- Top Symbols: saham dengan insider activity terbesar\n- Top Insiders: insider dengan activity terbesar\n- Movements: detail setiap transaksi\n- Alerts: notifikasi untuk activity signifikan\n\n**Alert Types:**\n- LARGE_ACCUMULATION: Akumulasi >= 1%\n- LARGE_DISTRIBUTION: Distribusi >= 1%\n- NEW_POSITION: Insider buka posisi baru\n- SIGNIFICANT_CHANGE: Kepemilikan >= 5%\n\n**Use Cases:**\n- Cari saham yang sedang diakumulasi insider\n- Monitor aktivitas komisaris/direktur\n- Deteksi perubahan kepemilikan signifikan\n- Follow smart money dari data KSEI",
+        "parameters": [
+          {
+            "name": "symbols",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Stock symbols dipisahkan koma (opsional - kosongkan untuk scan semua saham)",
+              "examples": [
+                "BBCA,BUMI,ADRO"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "min_percentage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Filter insider dengan PERUBAHAN kepemilikan >= X%. Minimum: 0%",
+              "minimum": 0,
+              "maximum": 100,
+              "examples": [
+                0.5,
+                1,
+                2,
+                5
+              ],
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Filter insider dengan PERUBAHAN kepemilikan >= X%. Minimum: 0%",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "examples": [
+                    0.5,
+                    1,
+                    2,
+                    5
+                  ],
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "min_ownership",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Filter insider dengan KEPEMILIKAN SAAT INI >= X%. Minimum: 0%",
+              "minimum": 0,
+              "maximum": 100,
+              "examples": [
+                1,
+                5,
+                10,
+                25,
+                50
+              ],
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Filter insider dengan KEPEMILIKAN SAAT INI >= X%. Minimum: 0%",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "examples": [
+                    1,
+                    5,
+                    10,
+                    25,
+                    50
+                  ],
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "source_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Filter by data source: KSEI (bulanan, lebih akurat) atau IDX (harian)",
+              "enum": [
+                "SOURCE_TYPE_UNSPECIFIED",
+                "SOURCE_TYPE_IDX",
+                "SOURCE_TYPE_KSEI"
+              ],
+              "default": "SOURCE_TYPE_UNSPECIFIED",
+              "type": "string"
+            }
+          },
+          {
+            "name": "action_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Filter by action type: BUY, SELL, CROSS (crossing), TRANSFER, CORPACTION (corporate action)",
+              "enum": [
+                "ACTION_TYPE_UNSPECIFIED",
+                "ACTION_TYPE_BUY",
+                "ACTION_TYPE_SELL",
+                "ACTION_TYPE_CROSS",
+                "ACTION_TYPE_TRANSFER",
+                "ACTION_TYPE_CORPACTION"
+              ],
+              "default": "ACTION_TYPE_UNSPECIFIED",
+              "type": "string"
+            }
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Filter by period (format: YYYY-MM atau YYYY-MM-DD)",
+              "examples": [
+                "2025-12",
+                "2025-12-01"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Nomor halaman untuk pagination. Minimum: 1. Default: 1",
+              "minimum": 1,
+              "default": 1,
+              "examples": [
+                1,
+                2,
+                3,
+                5,
+                10
+              ],
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Nomor halaman untuk pagination. Minimum: 1. Default: 1",
+                  "minimum": 1,
+                  "default": 1,
+                  "examples": [
+                    1,
+                    2,
+                    3,
+                    5,
+                    10
+                  ],
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Jumlah item per halaman. Range: 1-100. Default: 100",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 100,
+              "examples": [
+                10,
+                20,
+                50,
+                100
+              ],
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Jumlah item per halaman. Range: 1-100. Default: 100",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "default": 100,
+                  "examples": [
+                    10,
+                    20,
+                    50,
+                    100
+                  ],
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        ],
+        "operationId": "getApiAnalysisInsider-screening"
+      }
+    },
+    "/api/analysis/insider-net/{symbols}": {
+      "get": {
+        "tags": [
+          "Advanced Analytics"
+        ],
+        "summary": "Insider Net Buy/Sell Summary",
+        "description": "Calculate total net buy/sell summary for specific symbols.\n\n**Use Case:**\nSetelah menemukan saham dari insider-screening, gunakan endpoint ini untuk melihat total akumulasi/distribusi per symbol.\n\n**Filters:**\n- `date_start`: Filter dari tanggal (YYYY-MM-DD)\n- `date_end`: Filter sampai tanggal (YYYY-MM-DD)\n\n**Output:**\n- Per symbol: total buy, total sell, net shares, net value\n- Per insider: detail aktivitas setiap insider\n- Overall: total net value dan dominant action\n\n**Example:**\n1. Dari insider-screening, dapat BUMI, ADRO, BBCA yang ada insider activity\n2. Panggil /insider-net/BUMI,ADRO,BBCA?date_start=2025-11-01&date_end=2025-11-30\n3. Lihat mana yang net buy terbesar di bulan November",
+        "parameters": [
+          {
+            "name": "symbols",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Comma-separated stock symbols untuk hitung total net buy/sell",
+              "examples": [
+                "BBCA,BUMI,ADRO"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "date_start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Filter by start date (YYYY-MM-DD)",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "examples": [
+                "2025-11-01"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "date_end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Filter by end date (YYYY-MM-DD)",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "examples": [
+                "2025-12-31"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiAnalysisInsider-netBySymbols"
+      }
+    },
+    "/api/analysis/technical/{symbol}": {
+      "get": {
+        "tags": [
+          "Advanced Analytics"
+        ],
+        "summary": "Technical Analyst",
+        "description": "Comprehensive technical analysis with multiple indicators.\n\n**Available Indicators (use 'indicators' query param):**\n- `sma`: Simple Moving Average (5, 10, 20, 50, 200)\n- `ema`: Exponential Moving Average (5, 10, 20, 50, 200)\n- `rsi`: Relative Strength Index (14 period)\n- `macd`: MACD with signal line and histogram\n- `stochastic`: Stochastic Oscillator (%K, %D)\n- `bollinger`: Bollinger Bands with %B\n- `atr`: Average True Range\n- `obv`: On-Balance Volume\n- `vwap`: Volume Weighted Average Price\n- `trend`: Trend analysis (short/medium/long term)\n- `support_resistance`: Support & resistance levels\n- `signal`: Trading signal recommendation\n- `all`: All indicators (default)\n\n**Example Usage:**\n- All indicators: `/technical/BBCA`\n- Only RSI & MACD: `/technical/BBCA?indicators=rsi,macd`\n- Moving averages & trend: `/technical/BBCA?indicators=sma,ema,trend`\n\n**Timeframes:**\n- `daily`: Daily candles (default)\n- `15m`, `30m`, `1h`, `2h`, `3h`, `4h`: Intraday candles\n\n**Trading Signal:**\n- Action: STRONG_BUY, BUY, HOLD, SELL, STRONG_SELL\n- Confidence level (0-100%)\n- Detailed reasoning",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol (e.g., BBCA)",
+              "examples": [
+                "BBCA"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "timeframe",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Chart timeframe (default: daily)",
+              "enum": [
+                "daily",
+                "15m",
+                "30m",
+                "1h",
+                "2h",
+                "3h",
+                "4h"
+              ],
+              "default": "daily",
+              "type": "string"
+            }
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Number of candles to analyze (default: 100)",
+              "default": 100,
+              "minimum": 20,
+              "maximum": 500,
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Number of candles to analyze (default: 100)",
+                  "default": 100,
+                  "minimum": 20,
+                  "maximum": 500,
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "indicators",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Comma-separated indicators to calculate. Options: sma,ema,rsi,macd,stochastic,bollinger,atr,obv,vwap,trend,support_resistance,signal. Default: all",
+              "examples": [
+                "rsi,macd,bollinger",
+                "sma,ema,trend",
+                "all"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiAnalysisTechnicalBySymbol"
+      }
+    },
+    "/api/analysis/screener/multi-market": {
+      "get": {
+        "tags": [
+          "Advanced Analytics"
+        ],
+        "summary": "Multi-Market Screener",
+        "description": "Screen IDX stocks based on global market factors (commodities, forex).\n\n**Commodity Exposure Filter:**\n- `Coal`: ADRO, PTBA, ITMG, BUMI\n- `Oil`: MEDC, ELSA\n- `Gold`: ANTM, MDKA\n- `Nickel`: ANTM, INCO, NCKL\n- `CPO`: AALI, LSIP\n- `Tin`: TINS\n- `Copper`: TPIA\n\n**Forex Exposure Filter:**\n- `exporter`: Stocks that benefit from IDR weakening (ADRO, PTBA, ANTM, INCO, AALI)\n- `importer`: Stocks that benefit from IDR strengthening (ASII, UNVR, ICBP)\n\n**Output:**\n- Stock list with global factor impact analysis\n- Commodity impact: positive/negative/neutral based on commodity price movement\n- Forex impact: positive/negative/neutral based on USD/IDR movement\n- Overall score combining all factors\n- Global context: current commodity prices and forex rates\n\n**Use Cases:**\n- Find stocks benefiting from commodity rally\n- Screen exporters when IDR is weakening\n- Portfolio construction based on global factors",
+        "parameters": [
+          {
+            "name": "commodityExposure",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Filter by commodity exposure (comma-separated): Coal, Oil, Gold, Nickel, CPO, Tin, Copper",
+              "examples": [
+                "Coal,Oil",
+                "Gold,Nickel"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "forexExposure",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Filter by forex exposure type",
+              "enum": [
+                "exporter",
+                "importer",
+                "all"
+              ],
+              "default": "all",
+              "type": "string"
+            }
+          },
+          {
+            "name": "minPrice",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Minimum stock price filter",
+              "minimum": 0,
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Minimum stock price filter",
+                  "minimum": 0,
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "maxPrice",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Maximum stock price filter",
+              "minimum": 0,
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Maximum stock price filter",
+                  "minimum": 0,
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "minVolume",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Minimum volume filter",
+              "minimum": 0,
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "description": "Minimum volume filter",
+                  "minimum": 0,
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        ],
+        "operationId": "getApiAnalysisScreenerMulti-market"
+      }
+    },
+    "/api/global/market-overview": {
+      "get": {
+        "tags": [
+          "Global Market"
+        ],
+        "summary": "Market Overview",
+        "description": "Comprehensive global market summary including indices, commodities, and currencies in one response",
+        "operationId": "getApiGlobalMarket-overview"
+      }
+    },
+    "/api/global/indices-impact": {
+      "get": {
+        "tags": [
+          "Global Market"
+        ],
+        "summary": "Indices Impact on IHSG",
+        "description": "Global indices data with IHSG correlation analysis and prediction",
+        "operationId": "getApiGlobalIndices-impact"
+      }
+    },
+    "/api/global/impact-analysis": {
+      "get": {
+        "tags": [
+          "Global Market"
+        ],
+        "summary": "Global Impact Analysis",
+        "description": "Analyzes how global events (US market, oil price, forex) affect IDX sectors and stocks",
+        "operationId": "getApiGlobalImpact-analysis"
+      }
+    },
+    "/api/market-detector/broker-activity/{brokerCode}": {
+      "get": {
+        "tags": [
+          "Market Detector"
+        ],
+        "summary": "Get broker activity detail",
+        "description": "Retrieve detailed broker activity information including bandar detector and broker summary",
+        "parameters": [
+          {
+            "name": "brokerCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Broker code (e.g., DH)",
+              "examples": [
+                "DH",
+                "XL",
+                "CC"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "minimum": 1,
+                  "default": 1,
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50,
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "minimum": 1,
+                  "maximum": 100,
+                  "default": 50,
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Start date (YYYY-MM-DD)",
+              "examples": [
+                "2026-01-02"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "End date (YYYY-MM-DD)",
+              "examples": [
+                "2026-01-02"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "transactionType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Transaction type",
+              "enum": [
+                "TRANSACTION_TYPE_NET",
+                "TRANSACTION_TYPE_GROSS"
+              ],
+              "default": "TRANSACTION_TYPE_NET",
+              "type": "string"
+            }
+          },
+          {
+            "name": "marketBoard",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Market board",
+              "enum": [
+                "MARKET_BOARD_ALL",
+                "MARKET_BOARD_REGULAR",
+                "MARKET_BOARD_NEGOTIATED"
+              ],
+              "default": "MARKET_BOARD_ALL",
+              "type": "string"
+            }
+          },
+          {
+            "name": "investorType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Investor type",
+              "enum": [
+                "INVESTOR_TYPE_ALL",
+                "INVESTOR_TYPE_DOMESTIC",
+                "INVESTOR_TYPE_FOREIGN"
+              ],
+              "default": "INVESTOR_TYPE_ALL",
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiMarket-detectorBroker-activityByBrokerCode"
+      }
+    },
+    "/api/market-detector/top-broker": {
+      "get": {
+        "tags": [
+          "Market Detector"
+        ],
+        "summary": "Get top brokers",
+        "description": "Retrieve list of top brokers sorted by various criteria",
+        "parameters": [
+          {
+            "name": "sort",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Sort field",
+              "enum": [
+                "TB_SORT_BY_TOTAL_VALUE",
+                "TB_SORT_BY_NET_VALUE",
+                "TB_SORT_BY_TOTAL_VOLUME"
+              ],
+              "default": "TB_SORT_BY_TOTAL_VALUE",
+              "type": "string"
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Sort order",
+              "enum": [
+                "ORDER_BY_ASC",
+                "ORDER_BY_DESC"
+              ],
+              "default": "ORDER_BY_DESC",
+              "type": "string"
+            }
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Time period",
+              "enum": [
+                "TB_PERIOD_LAST_1_DAY",
+                "TB_PERIOD_LAST_1_WEEK",
+                "TB_PERIOD_LAST_1_MONTH"
+              ],
+              "default": "TB_PERIOD_LAST_1_DAY",
+              "type": "string"
+            }
+          },
+          {
+            "name": "marketType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Market type",
+              "enum": [
+                "MARKET_TYPE_ALL",
+                "MARKET_TYPE_REGULAR",
+                "MARKET_TYPE_NEGOTIATED"
+              ],
+              "default": "MARKET_TYPE_ALL",
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiMarket-detectorTop-broker"
+      }
+    },
+    "/api/market-detector/top-stock": {
+      "get": {
+        "tags": [
+          "Market Detector"
+        ],
+        "summary": "Get top stocks",
+        "description": "Retrieve list of top stocks by trading value, volume, or frequency",
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Start date (YYYY-MM-DD)",
+              "examples": [
+                "2026-01-05"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "End date (YYYY-MM-DD)",
+              "examples": [
+                "2026-01-05"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "investorType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Investor type",
+              "enum": [
+                "INVESTOR_TYPE_ALL",
+                "INVESTOR_TYPE_DOMESTIC",
+                "INVESTOR_TYPE_FOREIGN"
+              ],
+              "default": "INVESTOR_TYPE_ALL",
+              "type": "string"
+            }
+          },
+          {
+            "name": "marketType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Market type",
+              "enum": [
+                "MARKET_TYPE_ALL",
+                "MARKET_TYPE_REGULAR",
+                "MARKET_TYPE_NEGOTIATED"
+              ],
+              "default": "MARKET_TYPE_ALL",
+              "type": "string"
+            }
+          },
+          {
+            "name": "valueType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Value type",
+              "enum": [
+                "VALUE_TYPE_TOTAL",
+                "VALUE_TYPE_BUY",
+                "VALUE_TYPE_SELL"
+              ],
+              "default": "VALUE_TYPE_TOTAL",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "minimum": 1,
+                  "default": 1,
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        ],
+        "operationId": "getApiMarket-detectorTop-stock"
+      }
+    },
+    "/api/market-detector/broker-summary/{symbol}": {
+      "get": {
+        "tags": [
+          "Market Detector"
+        ],
+        "summary": "Get broker summary for a stock",
+        "description": "Retrieve broker trading summary for a specific stock symbol",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Stock symbol (e.g., BBCA)",
+              "examples": [
+                "BBCA",
+                "BBRI",
+                "BMRI"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Start date (YYYY-MM-DD)",
+              "examples": [
+                "2026-01-02"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "End date (YYYY-MM-DD)",
+              "examples": [
+                "2026-01-02"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "transactionType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Transaction type",
+              "enum": [
+                "TRANSACTION_TYPE_NET",
+                "TRANSACTION_TYPE_GROSS"
+              ],
+              "default": "TRANSACTION_TYPE_NET",
+              "type": "string"
+            }
+          },
+          {
+            "name": "marketBoard",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Market board",
+              "enum": [
+                "MARKET_BOARD_ALL",
+                "MARKET_BOARD_REGULAR",
+                "MARKET_BOARD_NEGOTIATED"
+              ],
+              "default": "MARKET_BOARD_ALL",
+              "type": "string"
+            }
+          },
+          {
+            "name": "investorType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Investor type",
+              "enum": [
+                "INVESTOR_TYPE_ALL",
+                "INVESTOR_TYPE_DOMESTIC",
+                "INVESTOR_TYPE_FOREIGN"
+              ],
+              "default": "INVESTOR_TYPE_ALL",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25,
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "minimum": 1,
+                  "maximum": 100,
+                  "default": 25,
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        ],
+        "operationId": "getApiMarket-detectorBroker-summaryBySymbol"
+      }
+    },
+    "/api/main/search": {
+      "get": {
+        "tags": [
+          "Main"
+        ],
+        "summary": "Search",
+        "description": "Search for companies",
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "description": "Kata kunci pencarian (kode saham atau nama perusahaan)",
+              "minLength": 1,
+              "default": "BBCA",
+              "examples": [
+                "BBCA",
+                "TLKM",
+                "BUMI",
+                "Bank Central"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "description": "Nomor halaman (dimulai dari 0)",
+              "examples": [
+                0,
+                1,
+                2
+              ],
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "minimum": 0,
+                  "default": 0,
+                  "description": "Nomor halaman (dimulai dari 0)",
+                  "examples": [
+                    0,
+                    1,
+                    2
+                  ],
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Tipe pencarian - hanya company yang didukung",
+              "default": "company",
+              "examples": [
+                "company"
+              ],
+              "const": "company",
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiMainSearch"
+      }
+    },
+    "/api/main/trending": {
+      "get": {
+        "tags": [
+          "Main"
+        ],
+        "summary": "Trending",
+        "description": "Get trending stocks on Stockbit",
+        "operationId": "getApiMainTrending"
+      }
+    },
+    "/api/main/morning-briefing": {
+      "get": {
+        "tags": [
+          "Main"
+        ],
+        "summary": "Morning Briefing",
+        "description": "All-in-one morning prep data: global indices, commodities, forex, and market sentiment",
+        "operationId": "getApiMainMorning-briefing"
+      }
+    },
+    "/api/main/commodities-impact": {
+      "get": {
+        "tags": [
+          "Main"
+        ],
+        "summary": "Commodities Impact",
+        "description": "Get commodity prices and their impact on related IDX stocks (coal, oil, gold, nickel, CPO, etc.)",
+        "operationId": "getApiMainCommodities-impact"
+      }
+    },
+    "/api/main/forex-idr-impact": {
+      "get": {
+        "tags": [
+          "Main"
+        ],
+        "summary": "Forex IDR Impact",
+        "description": "Get USD/IDR rate and its impact on IDX stocks (importers vs exporters)",
+        "operationId": "getApiMainForex-idr-impact"
+      }
+    },
+    "/api/main/us-stocks-parent": {
+      "get": {
+        "tags": [
+          "Main"
+        ],
+        "summary": "US Stocks Parent Companies",
+        "description": "Monitor US parent/related companies of IDX stocks (e.g., GOTO → Alibaba, BUKA → Microsoft)",
+        "parameters": [
+          {
+            "name": "symbols",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Comma-separated IDX stock symbols (e.g., GOTO,BUKA,TLKM). Leave empty for all.",
+              "examples": [
+                "GOTO,BUKA",
+                "TLKM"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiMainUs-stocks-parent"
+      }
+    },
+    "/api/beta/insights/{symbol}": {
+      "get": {
+        "tags": [
+          "BETA"
+        ],
+        "summary": "Stock Insights",
+        "description": "Mendapatkan insights/analisis saham dari Datasaham.io.\n\n**Data yang tersedia:**\n- Valuation (P/E ratio, P/S ratio, analyst rating, price target)\n- Earnings (EPS growth, revenue growth, quarterly performance)\n- Growth (forecast EPS, forecast revenue)\n- Performance (profit margin, revenue growth 3Y, earnings growth)\n- Health (current ratio, quick ratio, debt to equity, ROE)\n\n**Response:**\n- Summary dengan skor (good - bad)\n- Insights dikelompokkan per kategori\n- Perbandingan dengan peers dan industri\n- Raw data untuk analisis lanjutan\n\n**Catatan:** Fitur BETA - mungkin berubah tanpa pemberitahuan.",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Kode saham IDX (contoh: TLKM, BBCA, BBRI)",
+              "minLength": 1,
+              "maxLength": 10,
+              "examples": [
+                "TLKM",
+                "BBCA",
+                "BBRI",
+                "ASII"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiBetaInsightsBySymbol"
+      }
+    },
+    "/api/beta/earnings/{symbol}": {
+      "get": {
+        "tags": [
+          "BETA"
+        ],
+        "summary": "Stock Earnings",
+        "description": "Mendapatkan data earnings/laba saham dari Datasaham.io.\n\n**Data yang tersedia:**\n- EPS (Earnings Per Share) aktual dan forecast\n- Revenue aktual dan forecast\n- Earnings surprise (selisih aktual vs forecast)\n- Jadwal rilis laporan keuangan\n- Historical earnings (annual & quarterly)\n\n**Response:**\n- Summary (EPS & revenue tahun lalu)\n- Latest actual earnings dengan surprise\n- Forecast annual & quarterly\n- Historical data annual & quarterly\n\n**Catatan:** Fitur BETA - mungkin berubah tanpa pemberitahuan.",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Kode saham IDX (contoh: TLKM, BBCA, BBRI)",
+              "minLength": 1,
+              "maxLength": 10,
+              "examples": [
+                "TLKM",
+                "BBCA",
+                "BBRI",
+                "ASII"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiBetaEarningsBySymbol"
+      }
+    },
+    "/api/beta/equities/{symbol}": {
+      "get": {
+        "tags": [
+          "BETA"
+        ],
+        "summary": "Stock Equities/Financials",
+        "description": "Mendapatkan data keuangan/equities saham dari Datasaham.io.\n\n**Data yang tersedia:**\n- EPS, Revenue, Net Income\n- Profit Margin, ROE, ROA\n- Debt to Equity Ratio\n- P/E Ratio, P/B Ratio\n- Book Value Per Share\n- Assets, Liabilities, Long Term Debt\n- Shares Outstanding\n\n**Response:**\n- Latest financials summary\n- Year-over-year trends (growth)\n- Historical annual statements\n\n**Catatan:** Fitur BETA - mungkin berubah tanpa pemberitahuan.",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Kode saham IDX (contoh: TLKM, BBCA, BBRI)",
+              "minLength": 1,
+              "maxLength": 10,
+              "examples": [
+                "TLKM",
+                "BBCA",
+                "BBRI",
+                "ASII"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiBetaEquitiesBySymbol"
+      }
+    },
+    "/api/beta/keyratios/{symbol}": {
+      "get": {
+        "tags": [
+          "BETA"
+        ],
+        "summary": "Stock Key Ratios",
+        "description": "Mendapatkan key ratios saham dari Datasaham.io dengan perbandingan industri.\n\n**Data yang tersedia:**\n- Valuation Ratios (P/E, P/B, P/S)\n- Profitability (ROE, ROIC, Gross Margin, Operating Margin, Net Margin)\n- Liquidity (Current Ratio, Quick Ratio)\n- Leverage (Debt to Equity)\n- Per Share Data (EPS, Book Value, Revenue)\n\n**Response:**\n- Comparison: stock vs industry ratios\n- Historical stock metrics (annual & quarterly)\n- Industry benchmark metrics\n\n**Catatan:** Fitur BETA - mungkin berubah tanpa pemberitahuan.",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "description": "Kode saham IDX (contoh: TLKM, BBCA, BBRI)",
+              "minLength": 1,
+              "maxLength": 10,
+              "examples": [
+                "TLKM",
+                "BBCA",
+                "BBRI",
+                "ASII"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "getApiBetaKeyratiosBySymbol"
+      }
+    }
+  }
+}
