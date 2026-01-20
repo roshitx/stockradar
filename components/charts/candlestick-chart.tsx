@@ -24,39 +24,62 @@ interface CandlestickChartProps {
 }
 
 function getTimeframeParams(tf: ChartTimeframeDisplay): { from: string; to: string; apiTimeframe: string } {
+  // Use WIB timezone (UTC+7) for Indonesian market
   const now = new Date();
-  const to = now.toISOString().split("T")[0];
+  const wibOffset = 7 * 60; // WIB is UTC+7
+  const localOffset = now.getTimezoneOffset(); // in minutes, negative for ahead of UTC
+  const wibTime = new Date(now.getTime() + (wibOffset + localOffset) * 60 * 1000);
+
+  // Format date as YYYY-MM-DD in WIB
+  const formatDateWIB = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const todayWIB = formatDateWIB(wibTime);
   let from: string;
+  let to: string;
   let apiTimeframe: string;
 
   switch (tf) {
     case "1D":
-      from = to;
+      // For intraday today's data, use today as 'from' and tomorrow as 'to'
+      // Yahoo Finance requires period2 > period1
+      const tomorrowWIB = new Date(wibTime);
+      tomorrowWIB.setDate(wibTime.getDate() + 1);
+      from = todayWIB;
+      to = formatDateWIB(tomorrowWIB);
       apiTimeframe = "15m";
       break;
     case "1W":
-      const weekAgo = new Date(now);
-      weekAgo.setDate(now.getDate() - 7);
-      from = weekAgo.toISOString().split("T")[0];
+      const weekAgoWIB = new Date(wibTime);
+      weekAgoWIB.setDate(wibTime.getDate() - 7);
+      from = formatDateWIB(weekAgoWIB);
+      to = todayWIB;
       apiTimeframe = "1h";
       break;
     case "1M":
-      const monthAgo = new Date(now);
-      monthAgo.setMonth(now.getMonth() - 1);
-      from = monthAgo.toISOString().split("T")[0];
+      const monthAgoWIB = new Date(wibTime);
+      monthAgoWIB.setMonth(wibTime.getMonth() - 1);
+      from = formatDateWIB(monthAgoWIB);
+      to = todayWIB;
       apiTimeframe = "daily";
       break;
     case "3M":
-      const threeMonthsAgo = new Date(now);
-      threeMonthsAgo.setMonth(now.getMonth() - 3);
-      from = threeMonthsAgo.toISOString().split("T")[0];
+      const threeMonthsAgoWIB = new Date(wibTime);
+      threeMonthsAgoWIB.setMonth(wibTime.getMonth() - 3);
+      from = formatDateWIB(threeMonthsAgoWIB);
+      to = todayWIB;
       apiTimeframe = "daily";
       break;
     case "1Y":
     default:
-      const yearAgo = new Date(now);
-      yearAgo.setFullYear(now.getFullYear() - 1);
-      from = yearAgo.toISOString().split("T")[0];
+      const yearAgoWIB = new Date(wibTime);
+      yearAgoWIB.setFullYear(wibTime.getFullYear() - 1);
+      from = formatDateWIB(yearAgoWIB);
+      to = todayWIB;
       apiTimeframe = "daily";
       break;
   }
@@ -68,7 +91,7 @@ export function CandlestickChart({
   symbol,
   initialData = [],
   onTimeframeChange,
-  activeTimeframe = "1M",
+  activeTimeframe: initialTimeframe = "1M",
   className,
 }: CandlestickChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
@@ -77,6 +100,7 @@ export function CandlestickChart({
   const volumeSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<OHLCVCandle[]>(initialData);
+  const [selectedTimeframe, setSelectedTimeframe] = useState<ChartTimeframeDisplay>(initialTimeframe);
 
   const fetchData = async (tf: ChartTimeframeDisplay) => {
     setLoading(true);
@@ -171,8 +195,12 @@ export function CandlestickChart({
   useEffect(() => {
     if (!candleSeriesRef.current || !volumeSeriesRef.current) return;
 
-    // Defensive check: ensure data is an array
-    if (!Array.isArray(data) || data.length === 0) return;
+    // If no data, clear the chart
+    if (!Array.isArray(data) || data.length === 0) {
+      candleSeriesRef.current.setData([]);
+      volumeSeriesRef.current.setData([]);
+      return;
+    }
 
     const candleData: CandlestickData<Time>[] = data.map((d) => ({
       time: (d.timestamp / 1000) as Time,
@@ -195,11 +223,12 @@ export function CandlestickChart({
 
   useEffect(() => {
     if (initialData.length === 0) {
-      fetchData(activeTimeframe);
+      fetchData(selectedTimeframe);
     }
-  }, [activeTimeframe, symbol, initialData.length]);
+  }, [symbol]);
 
   const handleTimeframeChange = (tf: ChartTimeframeDisplay) => {
+    setSelectedTimeframe(tf);
     fetchData(tf);
     onTimeframeChange?.(tf);
   };
@@ -210,7 +239,7 @@ export function CandlestickChart({
     <div className={className}>
       <div className="mb-4 flex items-center justify-between">
         <TimeframeSelector
-          activeTimeframe={activeTimeframe}
+          activeTimeframe={selectedTimeframe}
           onTimeframeChange={handleTimeframeChange}
         />
       </div>
