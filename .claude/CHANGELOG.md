@@ -1,5 +1,68 @@
 # StockRadar Design Enhancement Changelog
 
+## 2026-01-20 - Fix ShadCN Color Mismatch (Hitam Putih Issue)
+
+### Problem
+UI displaying black/white colors instead of theme colors after ShadCN maia preset update.
+
+### Root Cause
+CSS color format mismatch:
+- `globals.css` uses **oklch()** format: `--primary: oklch(0.488 0.243 264.376)`
+- `tailwind.config.ts` wraps with **hsl()**: `primary: "hsl(var(--primary))"`
+- Result: `hsl(oklch(...))` = invalid CSS → fallback to black/white
+
+### Fixes Applied
+
+**1. `tailwind.config.ts`**
+- Changed oklch-based colors from `hsl(var(--xxx))` to `var(--xxx)`:
+  - border, input, ring, background, foreground
+  - primary, secondary, muted, accent, popover, card, sidebar, chart
+- Kept `hsl(var(--xxx))` for semantic colors still using HSL format:
+  - positive, negative, neutral (financial gain/loss colors)
+  - destructive-foreground
+- Added missing border-radius values for maia preset:
+  - `4xl: 1.875rem`, `3xl: 1.5rem`, `2xl: 1rem`, `xl: 0.75rem`
+
+**2. `app/globals.css`**
+- Removed duplicate `@apply` rules
+- Fixed invalid `outline-ring/50` class (oklch doesn't support Tailwind opacity modifiers)
+
+**3. Reinstalled ShadCN Components**
+All components reinstalled fresh with maia preset:
+- button, badge, card, input, select, label, textarea, separator
+- dropdown-menu, alert-dialog, combobox, field, input-group
+
+### Technical Note
+oklch (OKLab Color Space) provides wider color gamut than HSL. Semantic financial colors (positive/negative) remain in HSL format for now.
+
+---
+
+## 2026-01-20 - Yahoo Finance Integration & Chart Fixes
+
+### Added
+- Yahoo Finance 2 integration for IDX stock chart data (`lib/api/yahoo-finance.ts`)
+- Fallback pattern: Yahoo Finance → Datasaham → empty data
+- IDX symbols use `.JK` suffix (e.g., `BBCA.JK`)
+
+### Fixed
+- **Chart timeframe filter UI not updating**: Added internal state management (`selectedTimeframe`) to track user selection instead of relying only on prop
+- **Chart overlap when no data**: Now clears candlestick and volume series when data is empty, preventing overlap with "No chart data available" message
+- **1D timeframe showing no data**: Fixed date range calculation - Yahoo Finance requires `period1 !== period2`, so 1D now fetches from yesterday to today
+
+### Changed
+- `lib/api/datasaham.ts`: `getChartData()` now tries Yahoo Finance first before falling back to Datasaham API
+- `components/charts/candlestick-chart.tsx`:
+  - Uses internal `selectedTimeframe` state for UI display
+  - Clears chart series when data is empty
+  - 1D timeframe uses 2-day range for intraday data
+
+### Technical Details
+- yahoo-finance2 v3 requires instantiation: `new YahooFinance()` before calling methods
+- Type import from `yahoo-finance2/modules/chart` for `ChartResultArray`
+- Intraday intervals: 15m for 1D, 1h for 1W, daily for 1M/3M/1Y
+
+---
+
 ## 2026-01-20 - Stock Detail Page Data Fix
 
 ### Problem
