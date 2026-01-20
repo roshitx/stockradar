@@ -2,13 +2,16 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Search, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { cn } from "@/lib/utils";
 
 export function Header() {
+  const router = useRouter();
   const [scrolled, setScrolled] = React.useState(false);
+  const [searchValue, setSearchValue] = React.useState("");
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -17,6 +20,13 @@ export function Header() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchValue.trim()) {
+      router.push(`/stocks?q=${encodeURIComponent(searchValue.trim())}`);
+    }
+  };
 
   return (
     <header
@@ -43,13 +53,15 @@ export function Header() {
 
         {/* Search Bar - Desktop */}
         <div className="hidden flex-1 max-w-md mx-8 md:block">
-          <div className="relative">
+          <form onSubmit={handleSearch} className="relative">
             <Search
               className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
               aria-hidden="true"
             />
             <input
               type="search"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
               placeholder="Search stocks…"
               aria-label="Search stocks"
               className={cn(
@@ -59,7 +71,7 @@ export function Header() {
                 "transition-colors"
               )}
             />
-          </div>
+          </form>
         </div>
 
         {/* Actions */}
@@ -70,6 +82,7 @@ export function Header() {
             size="icon"
             className="md:hidden"
             aria-label="Search"
+            onClick={() => router.push("/stocks")}
           >
             <Search className="h-5 w-5" />
           </Button>

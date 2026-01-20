@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowRight, TrendingUp, BarChart3, Star, Zap } from "lucide-react";
 import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
@@ -130,9 +131,11 @@ async function MarketOverview() {
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-heading-1">Trending Stocks</h2>
-            <Button variant="ghost" className="gap-1">
-              View All
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            <Button variant="ghost" className="gap-1" asChild>
+              <Link href="/stocks?tab=trending">
+                View All
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
             </Button>
           </div>
 
@@ -147,26 +150,28 @@ async function MarketOverview() {
               <CarouselContent className="-ml-4">
                 {trendingStocks.map((stock) => (
                   <CarouselItem key={stock.symbol} className="pl-4 md:basis-1/2 lg:basis-1/4">
-                    <GlassCard hover className="p-5 relative">
-                      <div className="flex items-start justify-between">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-lg font-semibold">
-                              {stock.symbol}
-                            </span>
-                            <PriceBadge value={stock.changePercent} size="sm" />
+                    <Link href={`/stocks/${stock.symbol}`} className="block">
+                      <GlassCard hover className="p-5 relative">
+                        <div className="flex items-start justify-between">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg font-semibold">
+                                {stock.symbol}
+                              </span>
+                              <PriceBadge value={stock.changePercent} size="sm" />
+                            </div>
+                            <p className="mt-1 truncate text-sm text-muted-foreground">
+                              {stock.name}
+                            </p>
                           </div>
-                          <p className="mt-1 truncate text-sm text-muted-foreground">
-                            {stock.name}
+                        </div>
+                        <div className="mt-4">
+                          <p className="font-mono text-xl font-semibold font-tabular">
+                            Rp {formatCurrency(stock.price)}
                           </p>
                         </div>
-                      </div>
-                      <div className="mt-4">
-                        <p className="font-mono text-xl font-semibold font-tabular">
-                          Rp {formatCurrency(stock.price)}
-                        </p>
-                      </div>
-                    </GlassCard>
+                      </GlassCard>
+                    </Link>
                   </CarouselItem>
                 ))}
               </CarouselContent>
@@ -233,8 +238,8 @@ export default function HomePage() {
                   Get Started
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Button>
-                <Button variant="outline" size="lg">
-                  Browse Stocks
+                <Button variant="outline" size="lg" asChild>
+                  <Link href="/stocks">Browse Stocks</Link>
                 </Button>
               </div>
             </div>

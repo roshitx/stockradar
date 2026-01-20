@@ -11,6 +11,11 @@ import type {
   ChartData,
   ChartTimeframe,
   OHLCVCandle,
+  SearchResult,
+  StockInfo,
+  StockProfile,
+  StockKeyStats,
+  InsiderTransaction,
 } from "./types";
 
 const API_BASE_URL = process.env.DATASAHAM_API_URL!;
@@ -213,15 +218,299 @@ export async function getChartData(
   to: string
 ): Promise<ChartData> {
   const endpoint = `/api/chart/${symbol.toUpperCase()}/${timeframe}?from=${from}&to=${to}`;
-  const cacheDuration = timeframe === "daily"
-    ? CACHE_DURATIONS.chartDaily
-    : CACHE_DURATIONS.chartIntraday;
+  const cacheDuration =
+    timeframe === "daily"
+      ? CACHE_DURATIONS.chartDaily
+      : CACHE_DURATIONS.chartIntraday;
 
-  const data = await getCachedOrFetch<OHLCVCandle[]>(endpoint, cacheDuration);
+  const response = await getCachedOrFetch<any>(endpoint, cacheDuration);
+
+  // API returns { chartbit: [...], last_data, allow_decimal, previous_timestamp }
+  // Extract the chartbit array which contains OHLCV data
+  const rawData = response.chartbit || response.data || response || [];
+
+  // Transform chartbit format to our OHLCVCandle format
+  const data: OHLCVCandle[] = Array.isArray(rawData)
+    ? rawData.map((candle: any) => ({
+        timestamp: candle.timestamp || candle.time || candle.t || 0,
+        open: parseFloat(candle.open || candle.o || "0"),
+        high: parseFloat(candle.high || candle.h || "0"),
+        low: parseFloat(candle.low || candle.l || "0"),
+        close: parseFloat(candle.close || candle.c || "0"),
+        volume: parseInt(candle.volume || candle.v || "0", 10),
+      }))
+    : [];
 
   return {
     symbol: symbol.toUpperCase(),
     timeframe,
     data,
   };
+}
+
+export async function searchStocks(keyword: string): Promise<SearchResult[]> {
+  const endpoint = `/api/main/search?keyword=${encodeURIComponent(keyword)}`;
+  const response = await getCachedOrFetch<any>(endpoint, CACHE_DURATIONS.movers);
+
+  if (!Array.isArray(response)) {
+    return [];
+  }
+
+  return response.map((item: any) => ({
+    symbol: item.symbol || item.code || "",
+    name: item.name || "",
+    type: item.type,
+    sector: item.sector,
+  }));
+}
+
+export async function getTopVolume(): Promise<MoverStock[]> {
+  const endpoint = "/api/movers/top-volume";
+  const response = await getCachedOrFetch<any>(endpoint, CACHE_DURATIONS.movers);
+  const data = response.mover_list || response;
+
+  if (!Array.isArray(data)) {
+    console.error("[Datasaham] top-volume returned non-array:", data);
+    throw new DatasahamError("Invalid response structure", undefined, endpoint);
+  }
+
+  return data.map(transformDatasahamMover);
+}
+
+export async function getTopValue(): Promise<MoverStock[]> {
+  const endpoint = "/api/movers/top-value";
+  const response = await getCachedOrFetch<any>(endpoint, CACHE_DURATIONS.movers);
+  const data = response.mover_list || response;
+
+  if (!Array.isArray(data)) {
+    console.error("[Datasaham] top-value returned non-array:", data);
+    throw new DatasahamError("Invalid response structure", undefined, endpoint);
+  }
+
+  return data.map(transformDatasahamMover);
+}
+
+function transformStockInfo(data: any): StockInfo {
+  // Parse price - API returns string "432" as "price" field
+  const price = parseFloat(data.price || data.last || "0");
+
+  // Parse previous close
+  const previousClose = parseFloat(data.previous || "0");
+
+  // Parse change - API returns string "+20.00" or "-5.00"
+  const changeStr = String(data.change || "0").replace("+", "");
+  const change = parseFloat(changeStr);
+
+  // Parse percentage - API returns number 4.85 as "percentage" field
+  const changePercent =
+    typeof data.percentage === "number"
+      ? data.percentage
+      : parseFloat(data.percent || data.percentage || "0");
+
+  // Parse volume - API returns string "6230870300" or "NA"
+  const volumeStr = data.volume;
+  const volume =
+    volumeStr === "NA" || !volumeStr
+      ? 0
+      : parseInt(String(volumeStr).replace(/,/g, ""), 10);
+
+  // Parse value - API returns string or "NA"
+  const valueStr = data.value;
+  const value =
+    valueStr === "NA" || !valueStr
+      ? 0
+      : parseInt(String(valueStr).replace(/,/g, ""), 10);
+
+  // Parse frequency
+  const freqStr = data.frequency;
+  const frequency =
+    freqStr === "NA" || !freqStr
+      ? 0
+      : parseInt(String(freqStr).replace(/,/g, ""), 10);
+
+  return {
+    symbol: data.symbol || data.code || "",
+    name: data.name || "",
+    price,
+    change,
+    changePercent,
+    previousClose,
+    open: 0, // Not available in info endpoint
+    high: 0, // Not available in info endpoint
+    low: 0, // Not available in info endpoint
+    volume,
+    value,
+    frequency,
+    marketCap: data.market_cap?.raw || data.marketCap,
+    sector: data.sector,
+    subsector: data.sub_sector || data.subsector,
+    listedShares: data.listed_shares || data.listedShares,
+  };
+}
+
+export async function getStockInfo(symbol: string): Promise<StockInfo> {
+  const endpoint = `/api/emiten/${symbol.toUpperCase()}/info`;
+  const data = await getCachedOrFetch<any>(endpoint, CACHE_DURATIONS.stockDetail);
+  return transformStockInfo(data);
+}
+
+export async function getStockProfile(symbol: string): Promise<StockProfile> {
+  const endpoint = `/api/emiten/${symbol.toUpperCase()}/profile`;
+  const data = await getCachedOrFetch<any>(endpoint, CACHE_DURATIONS.stockList);
+
+  // Extract contact info from address array
+  const addressInfo = data.address?.[0] || {};
+
+  // Parse email - can be string or array
+  let email: string | undefined;
+  if (Array.isArray(addressInfo.email) && addressInfo.email.length > 0) {
+    email = addressInfo.email[0];
+  } else if (typeof addressInfo.email === "string") {
+    email = addressInfo.email;
+  }
+
+  // Get shareholders from shareholder array
+  const shareholders = (data.shareholder || []).map((s: any) => ({
+    name: s.name || "",
+    shares: 0, // Not directly available, stored as formatted "value"
+    percentage: parseFloat(String(s.percentage || "0").replace("%", "").replace("<", "")),
+  }));
+
+  // Get management from key_executive
+  const keyExec = data.key_executive || {};
+  const management: { name: string; position: string }[] = [];
+
+  // Add president director
+  for (const exec of keyExec.president_director || []) {
+    if (exec.value) management.push({ name: exec.value, position: "President Director" });
+  }
+  // Add vice president director
+  for (const exec of keyExec.vice_president || []) {
+    if (exec.value) management.push({ name: exec.value, position: "Vice President Director" });
+  }
+  // Add directors
+  for (const exec of keyExec.director || []) {
+    if (exec.value) management.push({ name: exec.value, position: "Director" });
+  }
+
+  return {
+    symbol: data.symbol || symbol.toUpperCase(),
+    name: data.name || "",
+    description: data.background || data.about || data.description,
+    sector: data.sector,
+    subsector: data.subsector,
+    industry: data.industry,
+    website: addressInfo.website?.trim(),
+    address: addressInfo.office,
+    phone: addressInfo.phone,
+    email,
+    employees: data.employees || data.total_employees,
+    listingDate: data.history?.date,
+    listedShares: data.listed_shares || data.shares_listed,
+    management: management.length > 0 ? management : undefined,
+    shareholders: shareholders.length > 0 ? shareholders : undefined,
+  };
+}
+
+export async function getStockKeyStats(symbol: string): Promise<StockKeyStats> {
+  const endpoint = `/api/emiten/${symbol.toUpperCase()}/keystats`;
+  const data = await getCachedOrFetch<any>(endpoint, CACHE_DURATIONS.stockList);
+
+  // Helper to find a value from closure_fin_items_results
+  const findFinItem = (name: string): string | undefined => {
+    const groups = data.closure_fin_items_results || [];
+    for (const group of groups) {
+      const items = group.fin_name_results || [];
+      for (const item of items) {
+        if (item.fitem?.name === name) {
+          return item.fitem.value;
+        }
+      }
+    }
+    return undefined;
+  };
+
+  // Helper to parse numeric value from string like "5.66" or "-1.62%" or "147,791 B"
+  const parseNum = (val: string | undefined): number | undefined => {
+    if (!val || val === "-") return undefined;
+    const cleaned = val.replace(/[%,B]/g, "").trim();
+    const num = parseFloat(cleaned);
+    return isNaN(num) ? undefined : num;
+  };
+
+  // Parse market cap from stats (e.g., "147,791 B" -> 147791000000000)
+  const parseMarketCap = (val: string | undefined): number | undefined => {
+    if (!val) return undefined;
+    const cleaned = val.replace(/,/g, "").replace(/\s*B\s*$/i, "").trim();
+    const num = parseFloat(cleaned);
+    if (isNaN(num)) return undefined;
+    return num * 1_000_000_000; // B = Billion IDR
+  };
+
+  const stats = data.stats || {};
+
+  return {
+    symbol: symbol.toUpperCase(),
+    pe: parseNum(findFinItem("Current PE Ratio (TTM)")),
+    eps: parseNum(findFinItem("Current EPS (TTM)")),
+    pbv: parseNum(findFinItem("Current Price to Book Value")),
+    roe: parseNum(findFinItem("Return on Equity (TTM)")),
+    roa: parseNum(findFinItem("Return on Assets (TTM)")),
+    der: parseNum(findFinItem("Debt to Equity Ratio (Quarter)")),
+    npm: parseNum(findFinItem("Net Profit Margin (Quarter)")),
+    opm: parseNum(findFinItem("Operating Profit Margin (Quarter)")),
+    gpm: parseNum(findFinItem("Gross Profit Margin (Quarter)")),
+    currentRatio: parseNum(findFinItem("Current Ratio (Quarter)")),
+    quickRatio: parseNum(findFinItem("Quick Ratio (Quarter)")),
+    dividendYield: parseNum(findFinItem("Dividend Yield")),
+    dividendPerShare: parseNum(findFinItem("Dividend")),
+    bookValue: parseNum(findFinItem("Current Book Value Per Share")),
+    marketCap: parseMarketCap(stats.market_cap),
+    enterpriseValue: parseMarketCap(stats.enterprise_value),
+    revenueGrowth: parseNum(findFinItem("Revenue (Quarter YoY Growth)")),
+    netIncomeGrowth: parseNum(findFinItem("Net Income (Quarter YoY Growth)")),
+    averageVolume: undefined, // Not available in this endpoint
+    beta: undefined, // Not available in this endpoint
+    week52High: parseNum(findFinItem("52 Week High")),
+    week52Low: parseNum(findFinItem("52 Week Low")),
+  };
+}
+
+export async function getStockInsiders(symbol: string): Promise<InsiderTransaction[]> {
+  const endpoint = `/api/emiten/${symbol.toUpperCase()}/insider`;
+  const response = await getCachedOrFetch<any>(endpoint, CACHE_DURATIONS.stockDetail);
+
+  // API returns { movement: [...], is_more: boolean }
+  const data = response.movement || response;
+
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  return data.map((item: any) => {
+    // Parse shares from changes.value (string like "-361,335,400")
+    const sharesStr = item.changes?.formatted_value || item.changes?.value || "0";
+    const shares = parseInt(String(sharesStr).replace(/,/g, "").replace("-", ""), 10);
+
+    // Parse price from price_formatted
+    const price = parseFloat(item.price_formatted || item.price || "0");
+
+    // Determine transaction type from action_type
+    const actionType = item.action_type || "";
+    const transactionType = actionType.includes("SELL") ? "sell" : "buy";
+
+    return {
+      date: item.date || item.transaction_date,
+      insiderName: item.name || item.insider_name,
+      position: item.position || item.title,
+      transactionType,
+      shares,
+      price,
+      value: shares * price,
+      sharesOwned: parseInt(
+        String(item.current?.value || "0").replace(/,/g, ""),
+        10
+      ),
+    };
+  });
 }

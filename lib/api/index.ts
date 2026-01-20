@@ -7,6 +7,13 @@ import {
   getIndicesImpact,
   getIHSG,
   getChartData,
+  searchStocks,
+  getTopVolume,
+  getTopValue,
+  getStockInfo,
+  getStockProfile,
+  getStockKeyStats,
+  getStockInsiders,
   DatasahamError,
 } from "./datasaham";
 import {
@@ -16,7 +23,17 @@ import {
   mockIndicesImpact,
   mockIHSGData,
 } from "./mock-data";
-import type { TrendingStock, MoverStock, IndicesImpactData, IHSGData } from "./types";
+import type {
+  TrendingStock,
+  MoverStock,
+  IndicesImpactData,
+  IHSGData,
+  SearchResult,
+  StockInfo,
+  StockProfile,
+  StockKeyStats,
+  InsiderTransaction,
+} from "./types";
 
 export * from "./types";
 export { DatasahamError };
@@ -107,3 +124,81 @@ export async function getIHSGData(): Promise<IHSGData> {
 }
 
 export { getChartData };
+
+export async function searchStocksData(keyword: string): Promise<SearchResult[]> {
+  try {
+    const data = await searchStocks(keyword);
+    return data;
+  } catch (error) {
+    console.error("[Datasaham] searchStocks failed:", error);
+    return [];
+  }
+}
+
+export async function getTopVolumeStocks(): Promise<MoverStock[]> {
+  try {
+    const data = await getTopVolume();
+
+    if (!Array.isArray(data) || data.length === 0) {
+      console.error("[Datasaham] getTopVolume returned invalid data:", data);
+      return mockTopGainers;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("[Datasaham] getTopVolume failed:", error);
+    return mockTopGainers;
+  }
+}
+
+export async function getTopValueStocks(): Promise<MoverStock[]> {
+  try {
+    const data = await getTopValue();
+
+    if (!Array.isArray(data) || data.length === 0) {
+      console.error("[Datasaham] getTopValue returned invalid data:", data);
+      return mockTopGainers;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("[Datasaham] getTopValue failed:", error);
+    return mockTopGainers;
+  }
+}
+
+export async function getStockInfoData(symbol: string): Promise<StockInfo | null> {
+  try {
+    return await getStockInfo(symbol);
+  } catch (error) {
+    console.error(`[Datasaham] getStockInfo(${symbol}) failed:`, error);
+    return null;
+  }
+}
+
+export async function getStockProfileData(symbol: string): Promise<StockProfile | null> {
+  try {
+    return await getStockProfile(symbol);
+  } catch (error) {
+    console.error(`[Datasaham] getStockProfile(${symbol}) failed:`, error);
+    return null;
+  }
+}
+
+export async function getStockKeyStatsData(symbol: string): Promise<StockKeyStats | null> {
+  try {
+    return await getStockKeyStats(symbol);
+  } catch (error) {
+    console.error(`[Datasaham] getStockKeyStats(${symbol}) failed:`, error);
+    return null;
+  }
+}
+
+export async function getStockInsidersData(symbol: string): Promise<InsiderTransaction[]> {
+  try {
+    return await getStockInsiders(symbol);
+  } catch (error) {
+    console.error(`[Datasaham] getStockInsiders(${symbol}) failed:`, error);
+    return [];
+  }
+}

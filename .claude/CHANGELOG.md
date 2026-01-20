@@ -1,5 +1,129 @@
 # StockRadar Design Enhancement Changelog
 
+## 2026-01-20 - Stock Detail Page Data Fix
+
+### Problem
+Stock detail page showing empty data for chart, key ratios, profile, and insider tabs despite API returning data.
+
+### Root Cause Analysis
+Datasaham API response structure differs from expected format in transformation functions:
+
+| Component | Expected | Actual API Structure |
+|-----------|----------|---------------------|
+| Stock Info | `last`, `percent`, `volume.raw` | `price`, `percentage` (string), `volume` (string) |
+| Chart | Direct array of candles | `{ chartbit: [...] }` |
+| Key Stats | Flat fields: `pe_ratio`, `roe` | Nested: `closure_fin_items_results[].fin_name_results[].fitem` |
+| Profile | `description`, `website` at root | `background`, `address[0].website`, `shareholder[]` |
+| Insider | Direct array | `{ movement: [...] }` |
+
+### Fixes Applied
+
+**1. `lib/api/datasaham.ts` - transformStockInfo()**
+- Fixed field mapping: `price` (string), `percentage` (string/number), `change` (string with sign)
+- Handle "NA" values for volume/value/frequency
+- Extract `sub_sector` for subsector field
+
+**2. `lib/api/datasaham.ts` - getChartData()**
+- Extract `response.chartbit` array instead of expecting direct array
+- Transform candle fields with fallbacks (`timestamp`/`time`/`t`, etc.)
+
+**3. `lib/api/datasaham.ts` - getStockKeyStats()**
+- Parse from nested `closure_fin_items_results` structure
+- Added `findFinItem()` helper to search by item name
+- Map fields: "Current PE Ratio (TTM)", "Return on Equity (TTM)", "52 Week High", etc.
+- Parse market cap from `stats.market_cap` (e.g., "147,791 B" → number)
+
+**4. `lib/api/datasaham.ts` - getStockProfile()**
+- Extract description from `data.background`
+- Get contact info from `data.address[0]` (website, phone, email, office)
+- Get shareholders from `data.shareholder[]` array
+- Get management from `data.key_executive` (president_director, director, etc.)
+- Get listing date from `data.history.date`
+
+**5. `lib/api/datasaham.ts` - getStockInsiders()**
+- Extract `response.movement` array instead of expecting direct array
+- Map fields: `action_type` → transactionType, `changes.formatted_value` → shares
+- Parse price from `price_formatted`, shares owned from `current.value`
+
+**6. `components/charts/candlestick-chart.tsx`**
+- Added "No chart data available" message when `chartbit` is empty
+- Set minimum height for empty state container
+
+**7. `app/stocks/[symbol]/page.tsx`**
+- Conditionally exclude Open/High/Low when value is 0 (not provided by API)
+- Show "-" for other fields when value is 0/missing
+
+### Files Modified (3)
+1. `lib/api/datasaham.ts` - All transformation functions
+2. `components/charts/candlestick-chart.tsx` - Empty state handling
+3. `app/stocks/[symbol]/page.tsx` - UI conditional rendering
+
+### Testing
+- Build: ✅ Compiled successfully
+- Cache cleared for fresh API fetch
+- Ready for manual verification at `/stocks/BUMI`
+
+---
+
+## 2026-01-20 - Phase 2: Stock List & Detail Pages
+
+### Added
+
+**API Layer (`lib/api/`):**
+- New types: `SearchResult`, `StockInfo`, `StockProfile`, `StockKeyStats`, `InsiderTransaction`, `ChartTimeframeDisplay`
+- New API functions: `searchStocks`, `getTopVolume`, `getTopValue`, `getStockInfo`, `getStockProfile`, `getStockKeyStats`, `getStockInsiders`
+- Corresponding wrapper functions with error handling in `lib/api/index.ts`
+
+**Components:**
+- `components/stocks/stock-card.tsx` - Card for stock in grid view
+- `components/stocks/stock-search.tsx` - Debounced search input with URL params
+- `components/stocks/filter-tabs.tsx` - Trending/Gainers/Losers/Volume/Value tabs
+- `components/stocks/insider-table.tsx` - Table for insider transactions
+- `components/charts/timeframe-selector.tsx` - 1D/1W/1M/3M/1Y selector
+- `components/charts/candlestick-chart.tsx` - Lightweight Charts wrapper with volume
+- `components/skeletons/stock-list-skeleton.tsx` - Loading state for stock list
+- `components/skeletons/stock-detail-skeleton.tsx` - Loading state for stock detail
+
+**Pages:**
+- `/stocks` page - Stock list with filter tabs and search
+- `/stocks/[symbol]` page - Stock detail with chart, tabs (Overview/Profile/Insider)
+- `/api/chart/[symbol]` - API route for dynamic chart data
+
+**Navigation Updates:**
+- "View All" button links to `/stocks?tab=trending`
+- Trending carousel items link to `/stocks/[symbol]`
+- "Browse Stocks" hero button links to `/stocks`
+- Header search redirects to `/stocks?q={query}`
+- Mobile search button navigates to `/stocks`
+
+### Dependencies
+- Added `lightweight-charts@5.1.0`
+- Added ShadCN components: `tabs`, `badge`, `table`
+
+### Files Created (13)
+1. `app/stocks/page.tsx`
+2. `app/stocks/loading.tsx`
+3. `app/stocks/[symbol]/page.tsx`
+4. `app/stocks/[symbol]/loading.tsx`
+5. `app/api/chart/[symbol]/route.ts`
+6. `components/stocks/stock-card.tsx`
+7. `components/stocks/stock-search.tsx`
+8. `components/stocks/filter-tabs.tsx`
+9. `components/stocks/insider-table.tsx`
+10. `components/charts/timeframe-selector.tsx`
+11. `components/charts/candlestick-chart.tsx`
+12. `components/skeletons/stock-list-skeleton.tsx`
+13. `components/skeletons/stock-detail-skeleton.tsx`
+
+### Files Modified (5)
+1. `lib/api/types.ts` - Added new types
+2. `lib/api/datasaham.ts` - Added new API functions
+3. `lib/api/index.ts` - Added exports with error handling
+4. `app/page.tsx` - Added navigation links
+5. `components/layout/header.tsx` - Made search functional
+
+---
+
 ## 2026-01-20 - Frontend Design Improvements
 
 ### 1. Navbar Enhancement
