@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
 import { Search, Menu } from "lucide-react";
@@ -6,8 +8,25 @@ import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { cn } from "@/lib/utils";
 
 export function Header() {
+  const [scrolled, setScrolled] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-lg">
+    <header
+      className={cn(
+        "fixed top-0 z-50 w-full transition-all duration-300",
+        scrolled
+          ? "border-b border-border/40 bg-background/80 backdrop-blur-lg shadow-sm"
+          : "border-b border-transparent bg-transparent"
+      )}
+    >
       <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link
@@ -34,8 +53,8 @@ export function Header() {
               placeholder="Search stocks…"
               aria-label="Search stocks"
               className={cn(
-                "h-10 w-full rounded-lg border border-input bg-background pl-10 pr-4",
-                "text-sm placeholder:text-muted-foreground",
+                "h-10 w-full rounded-lg border border-input bg-background/50 pl-10 pr-4",
+                "text-sm placeholder:text-muted-foreground backdrop-blur-sm",
                 "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
                 "transition-colors"
               )}
