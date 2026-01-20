@@ -3,245 +3,266 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    /* === SEMANTIC COLORS === */
+    :root {
+        /* === SEMANTIC COLORS === */
 
-    /* Backgrounds */
-    --background: 0 0% 100%;
-    --background-subtle: 0 0% 98%;
-    --background-muted: 0 0% 96%;
+        /* Backgrounds */
+        --background: oklch(1 0 0);
+        --background-subtle: 0 0% 98%;
+        --background-muted: 0 0% 96%;
 
-    /* Foregrounds */
-    --foreground: 0 0% 3.9%;
-    --foreground-muted: 0 0% 45%;
-    --foreground-subtle: 0 0% 63%;
+        /* Foregrounds */
+        --foreground: oklch(0.145 0 0);
+        --foreground-muted: 0 0% 45%;
+        --foreground-subtle: 0 0% 63%;
 
-    /* Cards & Surfaces */
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --card-border: 0 0% 89.8%;
+        /* Cards & Surfaces */
+        --card: oklch(1 0 0);
+        --card-foreground: oklch(0.145 0 0);
+        --card-border: 0 0% 89.8%;
 
-    /* Glass Effect (Light) */
-    --glass-background: 0 0% 100% / 0.7;
-    --glass-border: 0 0% 100% / 0.2;
-    --glass-blur: 12px;
+        /* Glass Effect (Light) */
+        --glass-background: 0 0% 100% / 0.7;
+        --glass-border: 0 0% 100% / 0.2;
+        --glass-blur: 12px;
 
-    /* === FINANCIAL SEMANTICS === */
+        /* === FINANCIAL SEMANTICS === */
 
-    /* Positive (Gains) - Emerald */
-    --positive: 158 64% 40%;
-    --positive-foreground: 158 64% 98%;
-    --positive-muted: 158 45% 92%;
-    --positive-subtle: 158 45% 96%;
+        /* Positive (Gains) - Emerald */
+        --positive: 158 64% 40%;
+        --positive-foreground: 158 64% 98%;
+        --positive-muted: 158 45% 92%;
+        --positive-subtle: 158 45% 96%;
 
-    /* Negative (Losses) - Rose */
-    --negative: 350 89% 55%;
-    --negative-foreground: 350 89% 98%;
-    --negative-muted: 350 70% 93%;
-    --negative-subtle: 350 70% 96%;
+        /* Negative (Losses) - Rose */
+        --negative: 350 89% 55%;
+        --negative-foreground: 350 89% 98%;
+        --negative-muted: 350 70% 93%;
+        --negative-subtle: 350 70% 96%;
 
-    /* Neutral (No Change) */
-    --neutral: 0 0% 63%;
-    --neutral-foreground: 0 0% 98%;
+        /* Neutral (No Change) */
+        --neutral: 0 0% 63%;
+        --neutral-foreground: 0 0% 98%;
 
-    /* === INTERACTIVE === */
+        /* === INTERACTIVE === */
 
-    /* Primary */
-    --primary: 220 70% 50%;
-    --primary-foreground: 0 0% 98%;
-    --primary-hover: 220 70% 45%;
+        /* Primary */
+        --primary: oklch(0.488 0.243 264.376);
+        --primary-foreground: oklch(0.97 0.014 254.604);
+        --primary-hover: 220 70% 45%;
 
-    /* Secondary */
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 220 9% 46%;
+        /* Secondary */
+        --secondary: oklch(0.967 0.001 286.375);
+        --secondary-foreground: oklch(0.21 0.006 285.885);
 
-    /* Accent */
-    --accent: 38 92% 50%;
-    --accent-foreground: 38 92% 10%;
+        /* Accent */
+        --accent: oklch(0.488 0.243 264.376);
+        --accent-foreground: oklch(0.97 0.014 254.604);
 
-    /* Destructive */
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+        /* Destructive */
+        --destructive: oklch(0.58 0.22 27);
+        --destructive-foreground: 0 0% 98%;
 
-    /* Muted */
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+        /* Muted */
+        --muted: oklch(0.97 0 0);
+        --muted-foreground: oklch(0.556 0 0);
 
-    /* === COMPONENT TOKENS === */
+        /* === COMPONENT TOKENS === */
 
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 220 70% 50%;
-    --radius: 0.75rem;
+        --border: oklch(0.922 0 0);
+        --input: oklch(0.922 0 0);
+        --ring: oklch(0.708 0 0);
+        --radius: 0.625rem;
 
-    /* Chart Colors */
-    --chart-1: 158 64% 40%;
-    --chart-2: 220 70% 50%;
-    --chart-3: 38 92% 50%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 350 89% 55%;
+        /* Chart Colors */
+        --chart-1: oklch(0.809 0.105 251.813);
+        --chart-2: oklch(0.623 0.214 259.815);
+        --chart-3: oklch(0.546 0.245 262.881);
+        --chart-4: oklch(0.488 0.243 264.376);
+        --chart-5: oklch(0.424 0.199 265.638);
 
-    /* Popover */
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
+        /* Popover */
+        --popover: oklch(1 0 0);
+        --popover-foreground: oklch(0.145 0 0);
 
-    /* Sidebar */
-    --sidebar: 0 0% 98%;
-    --sidebar-foreground: 0 0% 3.9%;
-    --sidebar-primary: 220 70% 50%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 0 0% 96%;
-    --sidebar-accent-foreground: 0 0% 3.9%;
-    --sidebar-border: 0 0% 89.8%;
-    --sidebar-ring: 220 70% 50%;
-  }
+        /* Sidebar */
+        --sidebar: oklch(0.985 0 0);
+        --sidebar-foreground: oklch(0.145 0 0);
+        --sidebar-primary: oklch(0.546 0.245 262.881);
+        --sidebar-primary-foreground: oklch(0.97 0.014 254.604);
+        --sidebar-accent: oklch(0.488 0.243 264.376);
+        --sidebar-accent-foreground: oklch(0.97 0.014 254.604);
+        --sidebar-border: oklch(0.922 0 0);
+        --sidebar-ring: oklch(0.708 0 0);
+    }
 
-  .dark {
-    /* === SEMANTIC COLORS === */
+    .dark {
+        /* === SEMANTIC COLORS === */
 
-    /* Backgrounds */
-    --background: 0 0% 4%;
-    --background-subtle: 0 0% 7%;
-    --background-muted: 0 0% 10%;
+        /* Backgrounds */
+        --background: oklch(0.145 0 0);
+        --background-subtle: 0 0% 7%;
+        --background-muted: 0 0% 10%;
 
-    /* Foregrounds */
-    --foreground: 0 0% 95%;
-    --foreground-muted: 0 0% 64%;
-    --foreground-subtle: 0 0% 45%;
+        /* Foregrounds */
+        --foreground: oklch(0.985 0 0);
+        --foreground-muted: 0 0% 64%;
+        --foreground-subtle: 0 0% 45%;
 
-    /* Cards & Surfaces */
-    --card: 0 0% 7%;
-    --card-foreground: 0 0% 95%;
-    --card-border: 0 0% 15%;
+        /* Cards & Surfaces */
+        --card: oklch(0.205 0 0);
+        --card-foreground: oklch(0.985 0 0);
+        --card-border: 0 0% 15%;
 
-    /* Glass Effect (Dark) */
-    --glass-background: 0 0% 10% / 0.6;
-    --glass-border: 0 0% 100% / 0.08;
-    --glass-blur: 16px;
+        /* Glass Effect (Dark) */
+        --glass-background: 0 0% 10% / 0.6;
+        --glass-border: 0 0% 100% / 0.08;
+        --glass-blur: 16px;
 
-    /* === FINANCIAL SEMANTICS === */
+        /* === FINANCIAL SEMANTICS === */
 
-    /* Positive (Gains) - Emerald */
-    --positive: 158 64% 52%;
-    --positive-foreground: 158 64% 10%;
-    --positive-muted: 158 35% 15%;
-    --positive-subtle: 158 35% 10%;
+        /* Positive (Gains) - Emerald */
+        --positive: 158 64% 52%;
+        --positive-foreground: 158 64% 10%;
+        --positive-muted: 158 35% 15%;
+        --positive-subtle: 158 35% 10%;
 
-    /* Negative (Losses) - Rose */
-    --negative: 350 89% 60%;
-    --negative-foreground: 350 89% 10%;
-    --negative-muted: 350 50% 15%;
-    --negative-subtle: 350 50% 10%;
+        /* Negative (Losses) - Rose */
+        --negative: 350 89% 60%;
+        --negative-foreground: 350 89% 10%;
+        --negative-muted: 350 50% 15%;
+        --negative-subtle: 350 50% 10%;
 
-    /* Neutral */
-    --neutral: 0 0% 50%;
-    --neutral-foreground: 0 0% 10%;
+        /* Neutral */
+        --neutral: 0 0% 50%;
+        --neutral-foreground: 0 0% 10%;
 
-    /* === INTERACTIVE === */
+        /* === INTERACTIVE === */
 
-    --primary: 220 70% 55%;
-    --primary-foreground: 0 0% 98%;
-    --primary-hover: 220 70% 60%;
+        --primary: oklch(0.42 0.18 266);
+        --primary-foreground: oklch(0.97 0.014 254.604);
+        --primary-hover: 220 70% 60%;
 
-    --secondary: 220 10% 15%;
-    --secondary-foreground: 220 10% 70%;
+        --secondary: oklch(0.274 0.006 286.033);
+        --secondary-foreground: oklch(0.985 0 0);
 
-    --accent: 38 92% 55%;
-    --accent-foreground: 38 92% 10%;
+        --accent: oklch(0.42 0.18 266);
+        --accent-foreground: oklch(0.97 0.014 254.604);
 
-    --destructive: 0 62% 50%;
-    --destructive-foreground: 0 0% 98%;
+        --destructive: oklch(0.704 0.191 22.216);
+        --destructive-foreground: 0 0% 98%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 64%;
+        --muted: oklch(0.269 0 0);
+        --muted-foreground: oklch(0.708 0 0);
 
-    /* === COMPONENT TOKENS === */
+        /* === COMPONENT TOKENS === */
 
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
-    --ring: 220 70% 55%;
+        --border: oklch(1 0 0 / 10%);
+        --input: oklch(1 0 0 / 15%);
+        --ring: oklch(0.556 0 0);
 
-    /* Popover */
-    --popover: 0 0% 7%;
-    --popover-foreground: 0 0% 95%;
+        /* Popover */
+        --popover: oklch(0.205 0 0);
+        --popover-foreground: oklch(0.985 0 0);
 
-    /* Sidebar */
-    --sidebar: 0 0% 7%;
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 220 70% 55%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 0 0% 15%;
-    --sidebar-ring: 220 70% 55%;
-  }
+        /* Sidebar */
+        --sidebar: oklch(0.205 0 0);
+        --sidebar-foreground: oklch(0.985 0 0);
+        --sidebar-primary: oklch(0.623 0.214 259.815);
+        --sidebar-primary-foreground: oklch(0.97 0.014 254.604);
+        --sidebar-accent: oklch(0.42 0.18 266);
+        --sidebar-accent-foreground: oklch(0.97 0.014 254.604);
+        --sidebar-border: oklch(1 0 0 / 10%);
+        --sidebar-ring: oklch(0.556 0 0);
+        --chart-1: oklch(0.809 0.105 251.813);
+        --chart-2: oklch(0.623 0.214 259.815);
+        --chart-3: oklch(0.546 0.245 262.881);
+        --chart-4: oklch(0.488 0.243 264.376);
+        --chart-5: oklch(0.424 0.199 265.638);
+    }
+    .theme {
+        --font-sans: var(--font-sans);
+    }
+    * {
+        @apply border-border;
+    }
+    body {
+        @apply bg-background text-foreground;
+    }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+    * {
+        @apply border-border;
+    }
 
-  html {
-    scroll-behavior: smooth;
-    color-scheme: light;
-  }
+    html {
+        scroll-behavior: smooth;
+        color-scheme: light;
+    }
 
-  html.dark {
-    color-scheme: dark;
-  }
+    html.dark {
+        color-scheme: dark;
+    }
 
-  body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
-  }
+    body {
+        @apply bg-background text-foreground;
+        font-feature-settings:
+            "rlig" 1,
+            "calt" 1;
+    }
 
-  /* Tabular numerals for financial data */
-  .font-tabular {
-    font-variant-numeric: tabular-nums;
-    font-feature-settings: "tnum" 1;
-  }
+    /* Tabular numerals for financial data */
+    .font-tabular {
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: "tnum" 1;
+    }
 
-  /* Focus visible for accessibility */
-  *:focus-visible {
-    @apply outline-2 outline-offset-2 outline-ring rounded-sm;
-  }
+    /* Focus visible for accessibility */
+    *:focus-visible {
+        @apply outline-2 outline-offset-2 outline-ring rounded-sm;
+    }
 
-  /* Text wrapping for headings */
-  h1, h2, h3, h4, h5, h6 {
-    text-wrap: balance;
-  }
+    /* Text wrapping for headings */
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        text-wrap: balance;
+    }
 
-  p {
-    text-wrap: pretty;
-  }
+    p {
+        text-wrap: pretty;
+    }
 }
 
 /* Price display typography */
 .price-display {
-  font-family: var(--font-geist-mono);
-  font-size: 1.5rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
+    font-family: var(--font-geist-mono);
+    font-size: 1.5rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
 }
 
 /* Percentage badge */
 .percentage {
-  font-family: var(--font-geist-mono);
-  font-size: 0.875rem;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
+    font-family: var(--font-geist-mono);
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
 }
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
