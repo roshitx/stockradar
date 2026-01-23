@@ -22,6 +22,21 @@ export function IHSGMiniChart({ data, isPositive }: IHSGMiniChartProps) {
   useEffect(() => {
     if (!chartContainerRef.current) return;
 
+    const styles = getComputedStyle(document.documentElement);
+    const positiveHsl = styles.getPropertyValue("--positive").trim();
+    const negativeHsl = styles.getPropertyValue("--negative").trim();
+
+    const hslToColor = (hsl: string) => `hsl(${hsl})`;
+    const hslToColorAlpha = (hsl: string, alpha: number) =>
+      `hsla(${hsl.replace(/\s+/g, ", ")}, ${alpha})`;
+
+    const lineColor = isPositive
+      ? hslToColor(positiveHsl)
+      : hslToColor(negativeHsl);
+    const topColor = isPositive
+      ? hslToColorAlpha(positiveHsl, 0.4)
+      : hslToColorAlpha(negativeHsl, 0.4);
+
     const chart = createChart(chartContainerRef.current, {
       layout: {
         background: { type: ColorType.Solid, color: "transparent" },
@@ -43,11 +58,6 @@ export function IHSGMiniChart({ data, isPositive }: IHSGMiniChartProps) {
       handleScroll: false,
       handleScale: false,
     });
-
-    const lineColor = isPositive ? "#10b981" : "#f43f5e";
-    const topColor = isPositive
-      ? "rgba(16, 185, 129, 0.4)"
-      : "rgba(244, 63, 94, 0.4)";
 
     const areaSeries = chart.addSeries(AreaSeries, {
       topColor,
