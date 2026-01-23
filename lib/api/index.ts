@@ -34,6 +34,10 @@ import type {
   StockKeyStats,
   InsiderTransaction,
 } from "./types";
+import {
+  getIHSGIntradayData,
+  type IHSGChartPoint,
+} from "./yahoo-finance";
 
 export * from "./types";
 export { DatasahamError };
@@ -124,6 +128,29 @@ export async function getIHSGData(): Promise<IHSGData> {
 }
 
 export { getChartData };
+
+export type { IHSGChartPoint };
+
+/**
+ * Fetch IHSG intraday chart data for area chart
+ * @returns Array of {time, value} for Lightweight Charts, empty array on failure
+ */
+export async function getIHSGIntradayChartData(): Promise<IHSGChartPoint[]> {
+  try {
+    const data = await getIHSGIntradayData();
+
+    // Validate data is an array with points
+    if (!Array.isArray(data) || data.length === 0) {
+      console.error("[Yahoo Finance] getIHSGIntradayData returned empty data");
+      return [];
+    }
+
+    return data;
+  } catch (error) {
+    console.error("[Yahoo Finance] getIHSGIntradayData failed:", error);
+    return [];
+  }
+}
 
 export async function searchStocksData(keyword: string): Promise<SearchResult[]> {
   try {
