@@ -14,6 +14,11 @@ import {
   getStockProfile,
   getStockKeyStats,
   getStockInsiders,
+  getStockFinancials,
+  getStockForeignOwnership,
+  getTechnicalAnalysis,
+  getSentimentAnalysis,
+  getRiskRewardAnalysis,
   DatasahamError,
 } from "./datasaham";
 import {
@@ -33,6 +38,11 @@ import type {
   StockProfile,
   StockKeyStats,
   InsiderTransaction,
+  StockFinancials,
+  FinancialReportType,
+  FinancialPeriodType,
+  ForeignOwnershipData,
+  AIInsightData,
 } from "./types";
 import {
   getIHSGIntradayData,
@@ -228,4 +238,55 @@ export async function getStockInsidersData(symbol: string): Promise<InsiderTrans
     console.error(`[Datasaham] getStockInsiders(${symbol}) failed:`, error);
     return [];
   }
+}
+
+export async function getStockFinancialsData(
+  symbol: string,
+  reportType: FinancialReportType = "income",
+  periodType: FinancialPeriodType = "annual"
+): Promise<StockFinancials | null> {
+  try {
+    return await getStockFinancials(symbol, reportType, periodType);
+  } catch (error) {
+    console.error(`[Datasaham] getStockFinancials(${symbol}) failed:`, error);
+    return null;
+  }
+}
+
+export async function getStockForeignOwnershipData(symbol: string): Promise<ForeignOwnershipData | null> {
+  try {
+    return await getStockForeignOwnership(symbol);
+  } catch (error) {
+    console.error(`[Datasaham] getStockForeignOwnership(${symbol}) failed:`, error);
+    return null;
+  }
+}
+
+export async function getAIInsightData(symbol: string): Promise<AIInsightData> {
+  const [technical, sentiment, riskReward] = await Promise.allSettled([
+    getTechnicalAnalysis(symbol),
+    getSentimentAnalysis(symbol),
+    getRiskRewardAnalysis(symbol),
+  ]);
+
+  const failures = [technical, sentiment, riskReward].filter(
+    (r) => r.status === "rejected"
+  );
+
+  if (failures.length > 0) {
+    console.error("[AI Insight] partial failures:", {
+      symbol,
+      count: failures.length,
+    });
+  }
+
+  return {
+    technical:
+      technical.status === "fulfilled" ? technical.value : null,
+    sentiment:
+      sentiment.status === "fulfilled" ? sentiment.value : null,
+    riskReward:
+      riskReward.status === "fulfilled" ? riskReward.value : null,
+    timestamp: Date.now(),
+  };
 }

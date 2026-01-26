@@ -44,6 +44,16 @@
         --neutral: 0 0% 63%;
         --neutral-foreground: 0 0% 98%;
 
+        /* === AI FEATURE THEME === */
+        /* Distinctive violet/purple gradient for AI-powered features */
+        --ai-primary: 270 91% 65%;
+        --ai-primary-foreground: 270 100% 98%;
+        --ai-secondary: 280 87% 55%;
+        --ai-accent: 260 95% 70%;
+        --ai-background: 270 50% 97%;
+        --ai-border: 270 60% 85%;
+        --ai-glow: 270 91% 65% / 0.15;
+
         /* === INTERACTIVE === */
 
         /* Primary */
@@ -136,6 +146,15 @@
         /* Neutral */
         --neutral: 0 0% 50%;
         --neutral-foreground: 0 0% 10%;
+
+        /* === AI FEATURE THEME (Dark) === */
+        --ai-primary: 270 91% 70%;
+        --ai-primary-foreground: 270 100% 10%;
+        --ai-secondary: 280 87% 60%;
+        --ai-accent: 260 95% 75%;
+        --ai-background: 270 30% 12%;
+        --ai-border: 270 40% 25%;
+        --ai-glow: 270 91% 70% / 0.2;
 
         /* === INTERACTIVE === */
 
@@ -253,6 +272,67 @@
     font-size: 0.875rem;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
+}
+
+/* === HERO ANIMATIONS & BACKGROUNDS === */
+
+.bg-grid {
+    background-size: 40px 40px;
+    background-image: linear-gradient(
+            to right,
+            var(--grid-color) 1px,
+            transparent 1px
+        ),
+        linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+    mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+}
+
+:root {
+    --grid-color: rgba(0, 0, 0, 0.05);
+}
+
+.dark {
+    --grid-color: rgba(255, 255, 255, 0.05);
+}
+
+@keyframes fade-in-up {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse-glow {
+    0%,
+    100% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.delay-100 {
+    animation-delay: 100ms;
+}
+
+.delay-200 {
+    animation-delay: 200ms;
+}
+
+.delay-300 {
+    animation-delay: 300ms;
 }
 
 /* Reduced motion support */

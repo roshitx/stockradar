@@ -54,15 +54,18 @@ export function InsiderTable({ transactions }: InsiderTableProps) {
         </TableHeader>
         <TableBody>
           {transactions.map((tx, index) => (
-            <TableRow key={`${tx.date}-${tx.insiderName}-${index}`}>
+            <TableRow 
+              key={`${tx.date}-${tx.insiderName}-${index}`}
+              className="transition-colors hover:bg-muted/50"
+            >
               <TableCell className="whitespace-nowrap">
                 {formatDate(tx.date)}
               </TableCell>
               <TableCell>
-                <div>
-                  <div className="font-medium">{tx.insiderName}</div>
+                <div className="min-w-0">
+                  <div className="font-medium truncate max-w-[200px]">{tx.insiderName}</div>
                   {tx.position && (
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs text-muted-foreground truncate max-w-[200px]">
                       {tx.position}
                     </div>
                   )}

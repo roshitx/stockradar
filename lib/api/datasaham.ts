@@ -16,7 +16,22 @@ import type {
   StockProfile,
   StockKeyStats,
   InsiderTransaction,
+  StockFinancials,
+  FinancialReportType,
+  FinancialPeriodType,
+  FinancialLineItem,
+  ForeignOwnershipData,
+  ForeignHolder,
+  TechnicalAnalysis,
+  SentimentAnalysis,
+  RiskRewardAnalysis,
 } from "./types";
+import { getYahooChartData } from "./yahoo-finance";
+import {
+  TechnicalAnalysisSchema,
+  SentimentAnalysisSchema,
+  RiskRewardAnalysisSchema,
+} from "./validation";
 
 const API_BASE_URL = process.env.DATASAHAM_API_URL!;
 const API_KEY = process.env.DATASAHAM_API_KEY!;
@@ -28,6 +43,7 @@ const CACHE_DURATIONS = {
   chartDaily: 60,
   trending: 5,
   movers: 5,
+  aiAnalysis: 5,
 } as const;
 
 export class DatasahamError extends Error {
@@ -217,46 +233,66 @@ export async function getChartData(
   from: string,
   to: string
 ): Promise<ChartData> {
+  // Try Yahoo Finance first (more reliable for IDX stocks)
+  const yahooData = await getYahooChartData(symbol, timeframe, from, to);
+
+  if (yahooData.length > 0) {
+    return {
+      symbol: symbol.toUpperCase(),
+      timeframe,
+      data: yahooData,
+    };
+  }
+
+  // Fallback to Datasaham if Yahoo fails
   const endpoint = `/api/chart/${symbol.toUpperCase()}/${timeframe}?from=${from}&to=${to}`;
   const cacheDuration =
     timeframe === "daily"
       ? CACHE_DURATIONS.chartDaily
       : CACHE_DURATIONS.chartIntraday;
 
-  const response = await getCachedOrFetch<any>(endpoint, cacheDuration);
+  try {
+    const response = await getCachedOrFetch<any>(endpoint, cacheDuration);
+    const rawData = response.chartbit || response.data || response || [];
 
-  // API returns { chartbit: [...], last_data, allow_decimal, previous_timestamp }
-  // Extract the chartbit array which contains OHLCV data
-  const rawData = response.chartbit || response.data || response || [];
+    const data: OHLCVCandle[] = Array.isArray(rawData)
+      ? rawData.map((candle: any) => ({
+          timestamp: candle.timestamp || candle.time || candle.t || 0,
+          open: parseFloat(candle.open || candle.o || "0"),
+          high: parseFloat(candle.high || candle.h || "0"),
+          low: parseFloat(candle.low || candle.l || "0"),
+          close: parseFloat(candle.close || candle.c || "0"),
+          volume: parseInt(candle.volume || candle.v || "0", 10),
+        }))
+      : [];
 
-  // Transform chartbit format to our OHLCVCandle format
-  const data: OHLCVCandle[] = Array.isArray(rawData)
-    ? rawData.map((candle: any) => ({
-        timestamp: candle.timestamp || candle.time || candle.t || 0,
-        open: parseFloat(candle.open || candle.o || "0"),
-        high: parseFloat(candle.high || candle.h || "0"),
-        low: parseFloat(candle.low || candle.l || "0"),
-        close: parseFloat(candle.close || candle.c || "0"),
-        volume: parseInt(candle.volume || candle.v || "0", 10),
-      }))
-    : [];
-
-  return {
-    symbol: symbol.toUpperCase(),
-    timeframe,
-    data,
-  };
+    return {
+      symbol: symbol.toUpperCase(),
+      timeframe,
+      data,
+    };
+  } catch (error) {
+    console.error(`[Datasaham] Chart fallback failed for ${symbol}:`, error);
+    return {
+      symbol: symbol.toUpperCase(),
+      timeframe,
+      data: [],
+    };
+  }
 }
 
 export async function searchStocks(keyword: string): Promise<SearchResult[]> {
   const endpoint = `/api/main/search?keyword=${encodeURIComponent(keyword)}`;
   const response = await getCachedOrFetch<any>(endpoint, CACHE_DURATIONS.movers);
 
-  if (!Array.isArray(response)) {
+  // Handle different response formats - extract array from nested structures
+  const data = response?.search_result || response?.results || response?.list || response;
+
+  if (!Array.isArray(data)) {
     return [];
   }
 
-  return response.map((item: any) => ({
+  return data.map((item: any) => ({
     symbol: item.symbol || item.code || "",
     name: item.name || "",
     type: item.type,
@@ -513,4 +549,191 @@ export async function getStockInsiders(symbol: string): Promise<InsiderTransacti
       ),
     };
   });
+}
+
+function formatLargeValue(value: number): string {
+  if (value === 0) return "-";
+  const absValue = Math.abs(value);
+  const sign = value < 0 ? "-" : "";
+  
+  if (absValue >= 1_000_000_000_000) {
+    return `${sign}${(absValue / 1_000_000_000_000).toFixed(2)}T`;
+  }
+  if (absValue >= 1_000_000_000) {
+    return `${sign}${(absValue / 1_000_000_000).toFixed(2)}B`;
+  }
+  if (absValue >= 1_000_000) {
+    return `${sign}${(absValue / 1_000_000).toFixed(2)}M`;
+  }
+  return new Intl.NumberFormat("id-ID").format(value);
+}
+
+function formatPercentage(value: number): string {
+  if (value === 0 || isNaN(value)) return "-";
+  return `${value >= 0 ? "+" : ""}${value.toFixed(2)}%`;
+}
+
+function formatRatio(value: number): string {
+  if (value === 0 || isNaN(value)) return "-";
+  return value.toFixed(2);
+}
+
+export async function getStockFinancials(
+  symbol: string,
+  reportType: FinancialReportType = "income",
+  periodType: FinancialPeriodType = "annual"
+): Promise<StockFinancials> {
+  const endpoint = `/api/beta/equities/${symbol.toUpperCase()}`;
+  const response = await fetchFromAPI<any>(endpoint);
+  
+  const items: FinancialLineItem[] = [];
+  const latestFinancials = response.latestFinancials || {};
+  const trends = response.trends || {};
+  const year = latestFinancials.year || new Date().getFullYear().toString();
+  
+  if (reportType === "income") {
+    const incomeItems = [
+      { name: "Revenue", value: latestFinancials.revenue, format: formatLargeValue },
+      { name: "Net Income", value: latestFinancials.netIncome, format: formatLargeValue },
+      { name: "EPS", value: latestFinancials.eps, format: formatRatio },
+      { name: "Net Profit Margin", value: latestFinancials.netProfitMargin, format: (v: number) => `${v.toFixed(2)}%` },
+      { name: "Revenue Growth", value: trends.revenueGrowth, format: formatPercentage },
+      { name: "Net Income Growth", value: trends.netIncomeGrowth, format: formatPercentage },
+      { name: "EPS Growth", value: trends.epsGrowth, format: formatPercentage },
+    ];
+    
+    for (const item of incomeItems) {
+      if (item.value !== undefined && item.value !== null) {
+        items.push({
+          name: item.name,
+          value: item.value,
+          formattedValue: item.format(item.value),
+        });
+      }
+    }
+  } else if (reportType === "balance") {
+    const balanceItems = [
+      { name: "Total Assets", value: latestFinancials.assets, format: formatLargeValue },
+      { name: "Total Liabilities", value: latestFinancials.liabilities, format: formatLargeValue },
+      { name: "Long Term Debt", value: latestFinancials.longTermDebt, format: formatLargeValue },
+      { name: "Book Value Per Share", value: latestFinancials.bookValuePerShare, format: formatRatio },
+      { name: "Shares Outstanding", value: latestFinancials.sharesOutstanding, format: formatLargeValue },
+      { name: "Debt to Equity Ratio", value: latestFinancials.debtToEquityRatio, format: formatRatio },
+    ];
+    
+    for (const item of balanceItems) {
+      if (item.value !== undefined && item.value !== null) {
+        items.push({
+          name: item.name,
+          value: item.value,
+          formattedValue: item.format(item.value),
+        });
+      }
+    }
+  } else if (reportType === "cashflow") {
+    const ratioItems = [
+      { name: "Return on Equity (ROE)", value: latestFinancials.returnOnEquity, format: (v: number) => `${(v * 100).toFixed(2)}%` },
+      { name: "Return on Assets (ROA)", value: latestFinancials.returnOnAssets, format: (v: number) => `${(v * 100).toFixed(2)}%` },
+      { name: "P/E Ratio", value: latestFinancials.priceToEarningsRatio, format: formatRatio },
+      { name: "P/B Ratio", value: latestFinancials.priceToBookRatio, format: formatRatio },
+      { name: "ROE Change", value: trends.roeChange, format: formatPercentage },
+      { name: "ROA Change", value: trends.roaChange, format: formatPercentage },
+    ];
+    
+    for (const item of ratioItems) {
+      if (item.value !== undefined && item.value !== null) {
+        items.push({
+          name: item.name,
+          value: item.value,
+          formattedValue: item.format(item.value),
+        });
+      }
+    }
+  }
+
+  return {
+    symbol: symbol.toUpperCase(),
+    reportType,
+    periodType,
+    period: `FY ${year}`,
+    items,
+  };
+}
+
+export async function getStockForeignOwnership(symbol: string): Promise<ForeignOwnershipData> {
+  const endpoint = `/api/emiten/${symbol.toUpperCase()}/foreign-ownership`;
+  const response = await getCachedOrFetch<any>(endpoint, CACHE_DURATIONS.stockList);
+
+  const rawHolders = response.holders || response.foreign_holders || response.data || [];
+  const holders: ForeignHolder[] = [];
+
+  if (Array.isArray(rawHolders)) {
+    for (const holder of rawHolders) {
+      const name = holder.name || holder.holder_name || holder.institution || "";
+      const shares = parseInt(String(holder.shares || holder.total_shares || "0").replace(/,/g, ""), 10);
+      const percentage = parseFloat(holder.percentage || holder.ownership_pct || "0");
+      const change = holder.change !== undefined ? parseFloat(holder.change) : undefined;
+
+      if (name) {
+        holders.push({ name, shares, percentage, change });
+      }
+    }
+  }
+
+  const totalForeignPercentage = parseFloat(response.total_foreign_pct || response.foreign_percentage || "0");
+
+  return {
+    symbol: symbol.toUpperCase(),
+    totalForeignPercentage,
+    holders,
+    lastUpdated: response.last_updated || response.updated_at,
+  };
+}
+
+export async function getTechnicalAnalysis(
+  symbol: string
+): Promise<TechnicalAnalysis | null> {
+  const endpoint = `/api/analysis/technical/${symbol.toUpperCase()}`;
+  try {
+    const data = await getCachedOrFetch<unknown>(
+      endpoint,
+      CACHE_DURATIONS.aiAnalysis
+    );
+    return TechnicalAnalysisSchema.parse(data);
+  } catch (error) {
+    console.error(`[Datasaham] getTechnicalAnalysis(${symbol}) failed:`, error);
+    return null;
+  }
+}
+
+export async function getSentimentAnalysis(
+  symbol: string
+): Promise<SentimentAnalysis | null> {
+  const endpoint = `/api/analysis/sentiment/${symbol.toUpperCase()}`;
+  try {
+    const data = await getCachedOrFetch<unknown>(
+      endpoint,
+      CACHE_DURATIONS.aiAnalysis
+    );
+    return SentimentAnalysisSchema.parse(data);
+  } catch (error) {
+    console.error(`[Datasaham] getSentimentAnalysis(${symbol}) failed:`, error);
+    return null;
+  }
+}
+
+export async function getRiskRewardAnalysis(
+  symbol: string
+): Promise<RiskRewardAnalysis | null> {
+  const endpoint = `/api/analysis/retail/risk-reward/${symbol.toUpperCase()}`;
+  try {
+    const data = await getCachedOrFetch<unknown>(
+      endpoint,
+      CACHE_DURATIONS.aiAnalysis
+    );
+    return RiskRewardAnalysisSchema.parse(data);
+  } catch (error) {
+    console.error(`[Datasaham] getRiskRewardAnalysis(${symbol}) failed:`, error);
+    return null;
+  }
 }

@@ -91,6 +91,15 @@ const config: Config = {
           "4": "var(--chart-4)",
           "5": "var(--chart-5)",
         },
+        ai: {
+          DEFAULT: "hsl(var(--ai-primary))",
+          foreground: "hsl(var(--ai-primary-foreground))",
+          secondary: "hsl(var(--ai-secondary))",
+          accent: "hsl(var(--ai-accent))",
+          background: "hsl(var(--ai-background))",
+          border: "hsl(var(--ai-border))",
+          glow: "hsl(var(--ai-glow))",
+        },
       },
       borderRadius: {
         "4xl": "1.875rem",
