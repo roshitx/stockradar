@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { GlassCard } from "@/components/ui/glass-card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardAction,
+  CardContent,
+} from "@/components/ui/card";
 import { PriceBadge } from "@/components/stocks/price-badge";
 import { Badge } from "@/components/ui/badge";
 import type { TrendingStock, MoverStock } from "@/lib/api/types";
@@ -31,35 +37,38 @@ function formatVolume(value: number): string {
 
 export function StockCard({ stock }: StockCardProps) {
   return (
-    <Link href={`/stocks/${stock.symbol}`} className="block">
-      <GlassCard hover className="p-5 h-full">
-        <div className="flex items-start justify-between">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-semibold">{stock.symbol}</span>
-              <PriceBadge value={stock.changePercent} size="sm" />
+    <Link href={`/stocks/${stock.symbol}`} className="block h-full">
+      <Card
+        size="sm"
+        className="h-full transition-all hover:ring-primary/20 hover:-translate-y-0.5"
+      >
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">
+            {stock.symbol}
+          </CardTitle>
+          <CardAction>
+            <PriceBadge value={stock.changePercent} size="sm" />
+          </CardAction>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="truncate text-sm text-muted-foreground">{stock.name}</p>
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="font-mono text-xl font-semibold tabular-nums">
+                Rp {formatCurrency(stock.price)}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Vol: {formatVolume(stock.volume)}
+              </p>
             </div>
-            <p className="mt-1 truncate text-sm text-muted-foreground">
-              {stock.name}
-            </p>
+            {stock.value > 0 && (
+              <Badge variant="secondary" className="text-xs">
+                Val: {formatVolume(stock.value)}
+              </Badge>
+            )}
           </div>
-        </div>
-        <div className="mt-4 flex items-end justify-between">
-          <div>
-            <p className="font-mono text-xl font-semibold font-tabular">
-              Rp {formatCurrency(stock.price)}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Vol: {formatVolume(stock.volume)}
-            </p>
-          </div>
-          {stock.value > 0 && (
-            <Badge variant="secondary" className="text-xs">
-              Val: {formatVolume(stock.value)}
-            </Badge>
-          )}
-        </div>
-      </GlassCard>
+        </CardContent>
+      </Card>
     </Link>
   );
 }

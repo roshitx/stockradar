@@ -12,8 +12,9 @@ import {
   getTopVolumeStocks,
   getTopValueStocks,
   searchStocksData,
+  getStockInfoData,
 } from "@/lib/api";
-import type { TrendingStock, MoverStock, SearchResult } from "@/lib/api/types";
+import type { TrendingStock, MoverStock } from "@/lib/api/types";
 
 interface StocksPageProps {
   searchParams: Promise<{ tab?: string; q?: string }>;
@@ -36,25 +37,38 @@ async function getStocksForTab(tab: FilterTab): Promise<(TrendingStock | MoverSt
   }
 }
 
-function convertSearchToStock(result: SearchResult): TrendingStock {
-  return {
-    symbol: result.symbol,
-    name: result.name,
-    price: 0,
-    change: 0,
-    changePercent: 0,
-    volume: 0,
-    value: 0,
-    frequency: 0,
-  };
-}
-
 async function StockGrid({ tab, query }: { tab: FilterTab; query?: string }) {
   let stocks: (TrendingStock | MoverStock)[];
 
   if (query) {
     const results = await searchStocksData(query);
-    stocks = results.map(convertSearchToStock);
+    // Fetch stock info for each search result to get price data
+    const stockInfoPromises = results.slice(0, 12).map(async (result) => {
+      const info = await getStockInfoData(result.symbol);
+      if (info) {
+        return {
+          symbol: info.symbol,
+          name: info.name,
+          price: info.price,
+          change: info.change,
+          changePercent: info.changePercent,
+          volume: info.volume,
+          value: info.value,
+          frequency: info.frequency,
+        } as TrendingStock;
+      }
+      return {
+        symbol: result.symbol,
+        name: result.name,
+        price: 0,
+        change: 0,
+        changePercent: 0,
+        volume: 0,
+        value: 0,
+        frequency: 0,
+      } as TrendingStock;
+    });
+    stocks = await Promise.all(stockInfoPromises);
   } else {
     stocks = await getStocksForTab(tab);
   }

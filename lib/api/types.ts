@@ -170,7 +170,65 @@ export interface InsiderTransaction {
   sharesOwned?: number;
 }
 
+// Financial Statement Types
+export type FinancialReportType = "income" | "balance" | "cashflow";
+export type FinancialPeriodType = "quarterly" | "annual" | "ttm";
+
+export interface FinancialLineItem {
+  name: string;
+  value: number;
+  formattedValue: string;
+}
+
+export interface StockFinancials {
+  symbol: string;
+  reportType: FinancialReportType;
+  periodType: FinancialPeriodType;
+  period: string; // e.g., "Q3 2025" or "FY 2024"
+  items: FinancialLineItem[];
+}
+
+// Foreign Ownership Types
+export interface ForeignHolder {
+  name: string;
+  shares: number;
+  percentage: number;
+  change?: number; // Change in ownership percentage
+}
+
+export interface ForeignOwnershipData {
+  symbol: string;
+  totalForeignPercentage: number;
+  holders: ForeignHolder[];
+  lastUpdated?: string;
+}
+
+import type {
+  TechnicalAnalysisValidated,
+  SentimentAnalysisValidated,
+  RiskRewardAnalysisValidated,
+} from "./validation";
+
+export type TechnicalAnalysis = TechnicalAnalysisValidated;
+export type SentimentAnalysis = SentimentAnalysisValidated;
+export type RiskRewardAnalysis = RiskRewardAnalysisValidated;
+
+export type RiskRewardRecommendation =
+  | "EXCELLENT_SETUP"
+  | "GOOD_SETUP"
+  | "FAIR_SETUP"
+  | "POOR_SETUP";
+
+export interface AIInsightData {
+  technical: TechnicalAnalysis | null;
+  sentiment: SentimentAnalysis | null;
+  riskReward: RiskRewardAnalysis | null;
+  timestamp: number;
+}
+
+// ============================================
 // Datasaham API Response Types (actual structure from API)
+// ============================================
 export interface DatasahamStock {
   change: string;
   symbol: string;
