@@ -583,81 +583,102 @@ export async function getStockFinancials(
   reportType: FinancialReportType = "income",
   periodType: FinancialPeriodType = "annual"
 ): Promise<StockFinancials> {
-  const endpoint = `/api/beta/equities/${symbol.toUpperCase()}`;
-  const response = await fetchFromAPI<any>(endpoint);
-  
+  // Map parameters to Datasaham API values
+  // report_type: 1=Income, 2=Balance, 3=CashFlow
+  // statement_type: 1=Quarterly, 2=Annual, 3=TTM
+  const reportTypeMap: Record<FinancialReportType, number> = {
+    income: 1,
+    balance: 2,
+    cashflow: 3,
+  };
+  const statementTypeMap: Record<FinancialPeriodType, number> = {
+    quarterly: 1,
+    annual: 2,
+    ttm: 3,
+  };
+
+  const endpoint = `/api/emiten/${symbol.toUpperCase()}/financials?report_type=${reportTypeMap[reportType]}&statement_type=${statementTypeMap[periodType]}`;
+  const response = await getCachedOrFetch<any>(endpoint, CACHE_DURATIONS.stockList);
+
   const items: FinancialLineItem[] = [];
-  const latestFinancials = response.latestFinancials || {};
-  const trends = response.trends || {};
-  const year = latestFinancials.year || new Date().getFullYear().toString();
   
-  if (reportType === "income") {
-    const incomeItems = [
-      { name: "Revenue", value: latestFinancials.revenue, format: formatLargeValue },
-      { name: "Net Income", value: latestFinancials.netIncome, format: formatLargeValue },
-      { name: "EPS", value: latestFinancials.eps, format: formatRatio },
-      { name: "Net Profit Margin", value: latestFinancials.netProfitMargin, format: (v: number) => `${v.toFixed(2)}%` },
-      { name: "Revenue Growth", value: trends.revenueGrowth, format: formatPercentage },
-      { name: "Net Income Growth", value: trends.netIncomeGrowth, format: formatPercentage },
-      { name: "EPS Growth", value: trends.epsGrowth, format: formatPercentage },
-    ];
+  // Response structure: { data: { rows: [...], periods: [...] } }
+  // Each row has: { name, values: [{ period, value }] }
+  const rows = response?.data?.rows || response?.rows || [];
+  const periods = response?.data?.periods || response?.periods || [];
+  
+  // Get the most recent period label for display
+  const latestPeriod = periods[0] || formatPeriodLabel(periodType);
+
+  for (const row of rows) {
+    const name = row.name || row.label || "";
+    // Get the most recent value (first in array)
+    const valueData = Array.isArray(row.values) ? row.values[0] : null;
+    const rawValue = valueData?.value ?? row.value ?? null;
     
-    for (const item of incomeItems) {
-      if (item.value !== undefined && item.value !== null) {
-        items.push({
-          name: item.name,
-          value: item.value,
-          formattedValue: item.format(item.value),
-        });
-      }
-    }
-  } else if (reportType === "balance") {
-    const balanceItems = [
-      { name: "Total Assets", value: latestFinancials.assets, format: formatLargeValue },
-      { name: "Total Liabilities", value: latestFinancials.liabilities, format: formatLargeValue },
-      { name: "Long Term Debt", value: latestFinancials.longTermDebt, format: formatLargeValue },
-      { name: "Book Value Per Share", value: latestFinancials.bookValuePerShare, format: formatRatio },
-      { name: "Shares Outstanding", value: latestFinancials.sharesOutstanding, format: formatLargeValue },
-      { name: "Debt to Equity Ratio", value: latestFinancials.debtToEquityRatio, format: formatRatio },
-    ];
+    if (rawValue === null || rawValue === undefined || name === "") continue;
     
-    for (const item of balanceItems) {
-      if (item.value !== undefined && item.value !== null) {
-        items.push({
-          name: item.name,
-          value: item.value,
-          formattedValue: item.format(item.value),
-        });
-      }
-    }
-  } else if (reportType === "cashflow") {
-    const ratioItems = [
-      { name: "Return on Equity (ROE)", value: latestFinancials.returnOnEquity, format: (v: number) => `${(v * 100).toFixed(2)}%` },
-      { name: "Return on Assets (ROA)", value: latestFinancials.returnOnAssets, format: (v: number) => `${(v * 100).toFixed(2)}%` },
-      { name: "P/E Ratio", value: latestFinancials.priceToEarningsRatio, format: formatRatio },
-      { name: "P/B Ratio", value: latestFinancials.priceToBookRatio, format: formatRatio },
-      { name: "ROE Change", value: trends.roeChange, format: formatPercentage },
-      { name: "ROA Change", value: trends.roaChange, format: formatPercentage },
-    ];
+    const numValue = typeof rawValue === "string" 
+      ? parseFloat(rawValue.replace(/,/g, "")) 
+      : rawValue;
     
-    for (const item of ratioItems) {
-      if (item.value !== undefined && item.value !== null) {
-        items.push({
-          name: item.name,
-          value: item.value,
-          formattedValue: item.format(item.value),
-        });
-      }
-    }
+    if (isNaN(numValue)) continue;
+
+    items.push({
+      name,
+      value: numValue,
+      formattedValue: formatFinancialValue(name, numValue),
+    });
   }
 
   return {
     symbol: symbol.toUpperCase(),
     reportType,
     periodType,
-    period: `FY ${year}`,
+    period: latestPeriod,
     items,
   };
+}
+
+function formatPeriodLabel(periodType: FinancialPeriodType): string {
+  const year = new Date().getFullYear();
+  switch (periodType) {
+    case "quarterly":
+      return `Q${Math.ceil((new Date().getMonth() + 1) / 3)} ${year}`;
+    case "ttm":
+      return `TTM ${year}`;
+    default:
+      return `FY ${year}`;
+  }
+}
+
+function formatFinancialValue(name: string, value: number): string {
+  const lowerName = name.toLowerCase();
+  
+  const isPercentageField =
+    lowerName.includes("margin") ||
+    lowerName.includes("growth") ||
+    lowerName.includes("roe") ||
+    lowerName.includes("roa") ||
+    lowerName.includes("yield") ||
+    (lowerName.includes("ratio") && lowerName.includes("%"));
+
+  if (isPercentageField) {
+    return formatPercentage(value);
+  }
+  
+  const isRatioField =
+    lowerName.includes("p/e") ||
+    lowerName.includes("p/b") ||
+    lowerName.includes("eps") ||
+    lowerName.includes("per share") ||
+    lowerName.includes("ratio");
+
+  if (isRatioField) {
+    return formatRatio(value);
+  }
+  
+  return formatLargeValue(value);
 }
 
 export async function getStockForeignOwnership(symbol: string): Promise<ForeignOwnershipData> {
