@@ -6,10 +6,13 @@ import { useRouter } from "next/navigation";
 import { Search, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { UserMenu } from "@/components/auth/user-menu";
+import { useAuth } from "@/components/auth/auth-provider";
 import { cn } from "@/lib/utils";
 
 export function Header() {
   const router = useRouter();
+  const { user, loading } = useAuth();
   const [scrolled, setScrolled] = React.useState(false);
   const [searchValue, setSearchValue] = React.useState("");
 
@@ -38,7 +41,6 @@ export function Header() {
       )}
     >
       <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Logo */}
         <Link
           href="/"
           className="flex items-center gap-2 transition-opacity hover:opacity-80"
@@ -51,7 +53,6 @@ export function Header() {
           </span>
         </Link>
 
-        {/* Search Bar - Desktop */}
         <div className="hidden flex-1 max-w-md mx-8 md:block">
           <form onSubmit={handleSearch} className="relative">
             <Search
@@ -74,9 +75,7 @@ export function Header() {
           </form>
         </div>
 
-        {/* Actions */}
         <div className="flex items-center gap-2">
-          {/* Mobile Search */}
           <Button
             variant="ghost"
             size="icon"
@@ -89,12 +88,18 @@ export function Header() {
 
           <ThemeToggle />
 
-          {/* Auth Button */}
-          <Button variant="default" size="sm" className="hidden sm:flex">
-            Sign In
-          </Button>
+          {loading ? (
+            <div className="h-10 w-10 rounded-full bg-muted animate-pulse hidden sm:block" />
+          ) : user ? (
+            <div className="hidden sm:block">
+              <UserMenu />
+            </div>
+          ) : (
+            <Button variant="default" size="sm" className="hidden sm:flex" asChild>
+              <Link href="/auth/login">Masuk</Link>
+            </Button>
+          )}
 
-          {/* Mobile Menu */}
           <Button
             variant="ghost"
             size="icon"
