@@ -8,10 +8,12 @@ import {
 } from "@/components/ui/card";
 import { PriceBadge } from "@/components/stocks/price-badge";
 import { Badge } from "@/components/ui/badge";
+import { StockSparkline, type SparklinePoint } from "./stock-sparkline";
 import type { TrendingStock, MoverStock } from "@/lib/api/types";
 
 type StockCardProps = {
   stock: TrendingStock | MoverStock;
+  sparklineData?: SparklinePoint[];
 };
 
 function formatCurrency(value: number): string {
@@ -35,7 +37,7 @@ function formatVolume(value: number): string {
   return value.toString();
 }
 
-export function StockCard({ stock }: StockCardProps) {
+export function StockCard({ stock, sparklineData }: StockCardProps) {
   return (
     <Link href={`/stocks/${stock.symbol}`} className="block h-full">
       <Card
@@ -52,8 +54,8 @@ export function StockCard({ stock }: StockCardProps) {
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="truncate text-sm text-muted-foreground">{stock.name}</p>
-          <div className="flex items-end justify-between">
-            <div>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1">
               <p className="font-mono text-xl font-semibold tabular-nums">
                 Rp {formatCurrency(stock.price)}
               </p>
@@ -61,11 +63,12 @@ export function StockCard({ stock }: StockCardProps) {
                 Vol: {formatVolume(stock.volume)}
               </p>
             </div>
-            {stock.value > 0 && (
-              <Badge variant="secondary" className="text-xs">
-                Val: {formatVolume(stock.value)}
-              </Badge>
-            )}
+            <StockSparkline
+              data={sparklineData || []}
+              isPositive={stock.changePercent >= 0}
+              width={80}
+              height={40}
+            />
           </div>
         </CardContent>
       </Card>

@@ -13,6 +13,8 @@ import {
   getTopValueStocks,
   searchStocksData,
   getStockInfoData,
+  getStockSparklineData,
+  type SparklinePoint,
 } from "@/lib/api";
 import type { TrendingStock, MoverStock } from "@/lib/api/types";
 
@@ -73,6 +75,18 @@ async function StockGrid({ tab, query }: { tab: FilterTab; query?: string }) {
     stocks = await getStocksForTab(tab);
   }
 
+  const sparklineResults = await Promise.allSettled(
+    stocks.map((stock) => getStockSparklineData(stock.symbol))
+  );
+
+  const stocksWithSparkline = stocks.map((stock, index) => {
+    const result = sparklineResults[index];
+    return {
+      ...stock,
+      sparklineData: result.status === "fulfilled" ? result.value : [],
+    };
+  });
+
   if (stocks.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -88,8 +102,12 @@ async function StockGrid({ tab, query }: { tab: FilterTab; query?: string }) {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {stocks.map((stock) => (
-        <StockCard key={stock.symbol} stock={stock} />
+      {stocksWithSparkline.map((stock) => (
+        <StockCard
+          key={stock.symbol}
+          stock={stock}
+          sparklineData={stock.sparklineData}
+        />
       ))}
     </div>
   );

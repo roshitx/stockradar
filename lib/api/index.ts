@@ -290,3 +290,34 @@ export async function getAIInsightData(symbol: string): Promise<AIInsightData> {
     timestamp: Date.now(),
   };
 }
+
+export type SparklinePoint = { time: string; value: number };
+
+export async function getStockSparklineData(symbol: string): Promise<SparklinePoint[]> {
+  try {
+    const to = new Date();
+    const from = new Date();
+    from.setDate(to.getDate() - 5);
+
+    const formatDate = (date: Date) => date.toISOString().split('T')[0];
+
+    const data = await getChartData(
+      symbol,
+      'daily',
+      formatDate(from),
+      formatDate(to)
+    );
+
+    if (!data || !Array.isArray(data.data) || data.data.length === 0) {
+      return [];
+    }
+
+    return data.data.map(candle => ({
+      time: formatDate(new Date(candle.timestamp)),
+      value: candle.close
+    }));
+  } catch (error) {
+    console.error(`[Datasaham] getStockSparklineData(${symbol}) failed:`, error);
+    return [];
+  }
+}
